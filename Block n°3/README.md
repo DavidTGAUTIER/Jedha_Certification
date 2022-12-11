@@ -9,4 +9,6 @@ there are 3 projects this time to show you Machine Learning skills : Predictive 
 
 email : davidtiffeneau@live.fr
 
-link to the video : 
+name : David TIFFENEAU-GAUTIER
+
+link to the video (UBER) : https://share.vidyard.com/watch/CJbh8LhApFDwJXzHr5xvWH?
