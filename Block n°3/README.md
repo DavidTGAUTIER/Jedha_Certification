@@ -11,4 +11,6 @@ email : davidtiffeneau@live.fr
 
 name : David TIFFENEAU-GAUTIER
 
+link to the video (Wallmart) : https://share.vidyard.com/watch/TKtxXiFzQ43iXibvpDnCS4?</br>
+link to the video (Conversion Rate) : https://share.vidyard.com/watch/HkkAaeEMYEkrbYLQQXorWB?</br>
 link to the video (UBER) : https://share.vidyard.com/watch/CJbh8LhApFDwJXzHr5xvWH?
