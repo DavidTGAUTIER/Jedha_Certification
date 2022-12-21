@@ -4,12 +4,6 @@ __pycache__/
 *$py.class
 
 # perso
-*.json
-.json
-*.csv
-.csv
-*.zip
-.zip
 *.obj
 .obj
 .db
