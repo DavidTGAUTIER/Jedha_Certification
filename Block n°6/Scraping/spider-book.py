@@ -7,6 +7,9 @@ import logging
 import pandas as pd
 from scrapy.crawler import CrawlerProcess
 import config
+#normal
+
+'''Ce spider permet de prendre en input la list-book-user avec quelques infos sur les livres et de sortir '''
 
 def scrapping_book_runner(output_file, log_level = logging.INFO):
   logging.info(f"SCRAPING BEGIN")
@@ -33,13 +36,19 @@ class BabelioBookSpider(scrapy.Spider):
     name = 'babelio-book'
     df_list_books = None
     
+    # on charge la liste des livres obtenus dans le 1er spider : spider-list-book
     def load_list_books(self, input_file):
         return pd.read_json(input_file, lines=True)
 
+    # on a crée un STATUS_FILE qui garde en mémoire les livres déja scraper (ce qui permet de ne pas tout faire en une fois et de ne pas scraper un même livre une seconde fois)
+
+    # va mettre à jour le STATUS_FILE en rajoutant chaque 'book_id' du livre qu'on va scraper
     def update_status_file(self, book_id):
+        # on ouvre le fichier STATUS_FILE et on ecrit le 'book_id' du livre
         with open(config.STATUS_FILE.format(config.NAME_USER), "a+") as f:
             f.write(f"{book_id}\n")
 
+    # permet de charger le STATUS_FILE : ouvre le fichier, pour chaque ligne du STATUS_FILE, on retire les espaces en fin de lignes et on stocke le resultat dans une liste
     def load_list_status(self):
         try:
             with open(config.STATUS_FILE.format(config.NAME_USER), "r") as file:
@@ -48,6 +57,8 @@ class BabelioBookSpider(scrapy.Spider):
         except:
             return []
 
+    # on redéfinit la methode 'from_crawler' de la classe mere de BabelioBookSpider(qui est scrapy.Spider)
+    # elle permet dedéclencher une méthode dans une classe Spider juste avant qu'elle ne se termine
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
         spider = super(BabelioBookSpider, cls).from_crawler(crawler, *args, **kwargs)
@@ -55,8 +66,9 @@ class BabelioBookSpider(scrapy.Spider):
         signals.engine_stopped
         return spider
 
-    # is execute in the end of all crawling
-    def engine_stopped(self): # just get some stats to know the % of the total books to scrap
+    # cette fonction va s'execute à la fin de tous les crawling
+    # affiche des stats pour savoir le % total de livres à scraper
+    def engine_stopped(self): 
         if self.df_list_books is not None:
             total_books = self.df_list_books.shape[0]
             list_status = self.load_list_status()
@@ -70,40 +82,60 @@ class BabelioBookSpider(scrapy.Spider):
             else: print(f'Bravo {config.NAME_USER} !!! C\'est fini !')
             print('')
 
+    # on commence le scraping par cette fonction : elle permet de boucler sur chaque livre de la liste des livres scraper dans le 1er Spider(spider-list-books)
+    #
     def start_requests(self):
+        # on charge la liste des livres scraper dans spider-list-books
         self.df_list_books = self.load_list_books(config.LIST_BOOKS_FILE)
+        # on charge egalement la liste des livres déja scraper avec ce spider (spider-books)
         list_status = self.load_list_status()
 
         i = 0
+        # pour chaque livre 
         for _, book in self.df_list_books.iterrows():
+            # on check si un livre (avec son id) est déja dans la liste de STATUS_FILE, on ne le scrape pas et on continue
             if str(book['book_id']) in list_status: # pour reprendre où le scrapper s'était arrêté
                 continue
+            # si i est inférieur au nombre maximum de livre à scraper, on incrémente i de 1 et on retourne l'url du livre, ainsi que son id et son nombre de commentaires(infos qui sont dans STATUS_FILE ou dans la liste déja scraper)
             if i < config.BOOKS_BY_PARSING:
                 i += 1
+                # on avait déja recuperer l'url des livres ce qui va nous permettre de commencer à scraper à partir de cet url (l'url de la page du livre)
                 yield scrapy.Request(book['book_url'], callback=self.parse, meta={'data' : {'book_id': book['book_id'], 'book_nb_comm':book['book_nb_comm']}})
 
-
+    # cette fonction permet de scraper le nom, prenom de l'auteur, titre, l'image et les tags (sous thème du livre)
+    # on commence à partir de la page du livre
     def parse(self, response):
+        # data va contenir toutes les infos précédemments récupérées (url, book_id, book_nb_comm')
         data = response.request.meta["data"]
-
+        
+        # on update le STATUS_FILE avec le book_id pour ajouter le livre scrapé à ce fichier (pour eviter de le rescraper)
         self.update_status_file(str(data['book_id']))
 
+        # on scrape toutes les infos qu'on a besoin
         name = response.xpath('//*[@id="page_corps"]/div/div[3]/div[2]/div[1]/div[2]/span[1]/a/span/text()').get(default="").strip()
+        # name = response.path('//div[@class='livre_con']/div[2]//a/span/b).get(default="").strip()[1])
         surname = response.xpath('//*[@id="page_corps"]/div/div[3]/div[2]/div[1]/div[2]/span[1]/a/span/b/text()').get(default="").strip()
+        # surnamme = response.xpath('//div[@class='livre_con']/div[2]//a/span/text()').get(default="").strip()
         title = response.xpath('//*[@class="livre_header_con"]/h1/a/text()').get(default="").strip()
         img_url = response.xpath('//div[@class="livre_con"]/div/img/@src').get(default="").strip()
         tags = ",".join([t.strip() for t in response.xpath('//*[@id="page_corps"]//p[@class="tags"]/a/text()').getall()])
 
+        # on crée une url pour les critiques qui utilise l'url de la page du livre + '/critiques' pour accéder à cette page
         url = response.url + "/critiques"
         
-        yield response.follow(url=url,callback=self.parse_critiques,meta={"data" : {**data, "title":title,"name":name,"surname":surname,"tags":tags,"img_url":img_url}, "nb_comm_fornow":0})
+        # on retourne l'url des critiques que l'on va suivre dans la prochaine fonction + toutes les infos récupérées
+        yield response.follow(url=url, callback=self.parse_critiques,meta={"data" : {**data, "title":title,"name":name,"surname":surname,"tags":tags,"img_url":img_url}, "nb_comm_fornow":0})
 
+    # dans cette fonction, on va récupérer toutes les critiques ainsi que les infos du profil utilisateur
     def parse_critiques(self,response):
+        # on stocke toutes les infos que l'on vient de récupérer dans une variable 'data'
         data = response.request.meta["data"]
+        # 'nb_comm_fornow' est initialisé à 0
         nb_comm_fornow = response.request.meta["nb_comm_fornow"]
-
+        # correspond à la vignette de chaque commentaire
         comments = response.xpath('//span[@itemprop="itemReviewed"]')
 
+        # pour chaque commentaire, on va 
         for com in comments:       
             url_profile = "https://www.babelio.com"+com.xpath('.//a[@class="author"]').attrib["href"]
             try:
