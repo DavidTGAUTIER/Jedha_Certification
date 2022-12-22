@@ -7,7 +7,7 @@ import logging
 import pandas as pd
 from scrapy.crawler import CrawlerProcess
 import config
-#normal things appears
+#normal things appears no
 
 '''Ce spider permet de prendre en input la list-book-user avec quelques infos sur les livres et de sortir '''
 
