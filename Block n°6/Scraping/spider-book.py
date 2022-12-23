@@ -69,11 +69,15 @@ class BabelioBookSpider(scrapy.Spider):
     # affiche des stats pour savoir le % total de livres à scraper
     def engine_stopped(self): 
         if self.df_list_books is not None:
+            # nombre total de livres
             total_books = self.df_list_books.shape[0]
+            # liste de livres déja scrapé
             list_status = self.load_list_status()
+            # nombre de livres déja scrapé
             current_books_parsed = len(list_status)
             print('')
             print(f"##### {current_books_parsed} livres parsés sur {total_books} #####")
+            # pourcentage du nombre de livres déja scrapé / total de livres 
             print(f"##### {round((current_books_parsed / total_books)*100, 2)}% d'avancement #####")
             print('')
             if current_books_parsed < total_books:
@@ -129,13 +133,14 @@ class BabelioBookSpider(scrapy.Spider):
     def parse_critiques(self,response):
         # on stocke toutes les infos que l'on vient de récupérer dans une variable 'data'
         data = response.request.meta["data"]
-        # 'nb_comm_fornow' est initialisé à 0
+        # 'nb_comm_fornow' est initialisé à 0 et va être incrémenter pour connaitre le nombre de commentaires que l'on à scraper
         nb_comm_fornow = response.request.meta["nb_comm_fornow"]
-        # correspond à la vignette de chaque commentaire
+        # comments correspond à la vignette de tous les commentaires (chaque commentaire est dans une sous vignettes que l'on va parcourir grace à la boucle 'for com in comments')
         comments = response.xpath('//span[@itemprop="itemReviewed"]')
 
-        # pour chaque commentaire, on va 
-        for com in comments:       
+        # pour chaque commentaire, on va récupérer les infos concernant l'autheur du commentaire, son identifiant
+        for com in comments:  
+            # sur la page de critiques d'un livre (ex:'https://www.babelio.com' + '/livres/Da-Costa-La-doublure/1433127/critiques')     
             url_profile = "https://www.babelio.com"+com.xpath('.//a[@class="author"]').attrib["href"]
             try:
                 user_id = url_profile.split('=')[1].strip()
