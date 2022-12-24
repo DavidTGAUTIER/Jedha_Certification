@@ -1,5 +1,9 @@
 ## Projet Bloc n°6 : Recommendation system based on sentiments analysis
 
+email : davidtiffeneau@live.fr</br>
+name : David TIFFENEAU-GAUTIER</br>
+link to the video (Babelio) : https://share.vidyard.com/watch/VatAPLyKLAPJXqAUVMuyhQ?
+
 Francais : 
 
 Ce projet est né d'une idée selon laquelle les recommandations actuelles de contenu n'étaient pas assez personnalisé et ciblé sur le ressenti d'un utilisateur. Au lieu d'etablir une recommandation sur les notes seulement, nous avons choisi de construire un système qui permettrait à l'utilisateur d'avoir le choix sur du contenu similaire aux émotions que lui à procurer le contenu qu'il a aimé. Nous avons ciblé les livres comme type de contenu car notre étude se base sur les commentaires des utilisateurs et ils sont riches en émotions et en vocabulaire. Nous avons décomposer notre travail en plusieurs taches :
@@ -15,11 +19,6 @@ Ce projet est né d'une idée selon laquelle les recommandations actuelles de co
 Chaque étape sera documenter par son propre fichier README.md 
 
 Voici le rendu de l'application : http://mldatago.com:8080/
-
-email : davidtiffeneau@live.fr</br>
-name : David TIFFENEAU-GAUTIER</br>
-link to the video () : 
-
 
 English : 
 
