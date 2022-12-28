@@ -1,0 +1,11 @@
+pandas
+numpy
+streamlit
+plotly 
+openpyxl 
+boto 
+boto3
+altair
+joblib
+pydeck
+sklearn
