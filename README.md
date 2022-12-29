@@ -19,10 +19,16 @@ Jedha projects for Data Science Developper's certification in 6 validation block
   * L2 Regularization for prevent overfitting
   * Create clustering (both KMEANS & DBSCAN) 
 
-### Block n°4 : Predictive analysis of unstructured data by artificial intelligence - AT&T : SMS Spam Detector 
+### Block n°4 : Predictive analysis of unstructured data by artificial intelligence - AT&T SMS Spam Detector 
 * EDA for understand which parameters influence spam detection
 * Text Preprocessing for NLP (Vectorization and padding sequence)
 * Test a lot of different models to improve accuracy
 * Knowledge of Transformers
 * Use GPU to increase speed for training models
 
+### Block n°5 : Industrialization of a machine learning algorithm and automation of decision-making processes - Get Around Car Rental Analysor
+* EDA on delays and pricing contents to understand relationship between rental cars and delays behavior
+* ML production with XGBoost
+* Deployment in ML Production
+* Create Dashboard with Streamlit App
+* FastAPI for docs
