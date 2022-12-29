@@ -32,3 +32,12 @@ Jedha projects for Data Science Developper's certification in 6 validation block
 * Deployment in ML Production
 * Create Dashboard with Streamlit App
 * FastAPI for docs
+
+### Block n°6 : Data management project management - Recommendation system based on sentiments analysis
+* Data Mining to etablish database
+* Creation of a dictionary of synonyms and vectors of feelings (8 feelings: joy, anger, fear, sadness, confidence, surprise, shame, disgust)
+* EDA on Ratings, User and Editor Behaviors
+* Data processing and formatting to create similarity vectors between emotions (cosine similarity and Jaccard distance)
+* Using Transformers to create a neural network to classify feelings
+* Creation of the recommender system thanks to similarity calculations
+* Web App
