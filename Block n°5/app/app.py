@@ -15,6 +15,7 @@ st.set_page_config(
 st.title("Analyse des retards")
 
 @st.cache
+# Importation des données depuis AWS s3
 def import_data():
 
     client = boto3.client(
