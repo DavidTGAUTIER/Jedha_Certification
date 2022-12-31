@@ -115,7 +115,7 @@ Exemple de données d'entrée:
   "has_speed_regulator": true,
   "winter_tires": true
 }
-Devrait retourner : "prediction": 106
+Devrait retourner : "prediction": 108.75097498268137
 
 Toutes les entrées sont sensibles à la casse. 
 La liste des valeurs possibles pour les colonnes catégorielles est disponible dans le endpoint /unique-values. 
