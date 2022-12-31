@@ -130,10 +130,10 @@ Des valeurs erronées renverront un message d'erreur spécifique."""
     # Ajout des valeurs du sample au dataframe sample_df
     sample_df.loc[0] = list(features.values())
     # Chargement du modèle avec pickle
-    with open('../src/models/gradient_boosting_model', 'rb') as f:
+    with open('../../src/models/gradient_boosting_model', 'rb') as f:
         gbr_model = pickle.load(f)
     # Chargement du preprocessor avec joblib
-    preprocessor = joblib.load('../src/models/preprocessor.pkl')
+    preprocessor = joblib.load('../../src/models/preprocessor.pkl')
     # Application du preprocessing sur sample_df
     X = preprocessor.transform(sample_df)
     # On fait les predictions avec le modèle Gradient Boosting Regressor
@@ -147,7 +147,7 @@ Des valeurs erronées renverront un message d'erreur spécifique."""
 @app.get("/preview")
 async def preview(rows: int):
     """ Donne une preview du dataset : on doit entrer le nombre de lignes sous forme d'integer"""
-    df = pd.read_csv('../src/get_around_pricing_project.csv')
+    df = pd.read_csv('../../src/get_around_pricing_project.csv')
     preview = df.head(rows)
     return preview.to_dict()
 
@@ -156,7 +156,7 @@ async def get_unique(column: str):
     """Valeurs uniques pour une colonne donnée : nom de la feature (sous forme de string). 
     Exemple de suffixe : /unique-values?column=model_key
     Ne fonctionne que pour des valeurs catégorielles (`Rental_price_per_day` ou `Mileage` renverra une erreur)."""
-    df = pd.read_csv('../src/get_around_pricing_project.csv')
+    df = pd.read_csv('../../src/get_around_pricing_project.csv')
     select = df[column].unique()
     return list(select)
 
@@ -167,7 +167,7 @@ async def groupby_agg(column:str,parameter:str):
     1. la colonne (sous forme de string),
     2. le paramètre d'agrégation (sous forme de string).
     Exemple de suffixe : /groupby?column=model_key&parameter=mean"""
-    df = pd.read_csv('../src/get_around_pricing_project.csv')
+    df = pd.read_csv('../../src/get_around_pricing_project.csv')
     df_groupby = df.groupby(column).agg(parameter)
     return df_groupby.to_dict()
 
@@ -178,7 +178,7 @@ async def get_filtered(column:str,category:str):
     1. colonne (sous forme de string),
     2. catégorie (sous forme de string).
     Exemple de suffixe : /filter-by?column=model_key&category=Toyota"""
-    df = pd.read_csv('../src/get_around_pricing_project.csv')
+    df = pd.read_csv('../../src/get_around_pricing_project.csv')
     filtered_df = df.loc[data[column] == category]
     return filtered_df.to_dict()
 
@@ -190,7 +190,7 @@ async def get_quantile(column:str,decimal:float):
     2. quantile (flottant entre 0 et 1, ex : 0,75).
     La méthode d'interpolation utilisée lorsque le quantile souhaité est compris entre 2 points de données est 'le plus proche'(nearest) pour les données catégorielles et 'linéaire'(linear) pour les données numériques.
     Exemple de suffixe : /quantile?column=mileage&decimal=0.25"""
-    df = pd.read_csv('../src/get_around_pricing_project.csv')
+    df = pd.read_csv('../../src/get_around_pricing_project.csv')
     try:
         quantile_df = df[column].quantile(decimal,interpolation='linear')
     except:
