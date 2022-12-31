@@ -93,3 +93,41 @@ class Features(BaseModel):
     def engine_power_is_positive(cls, v):
         assert v >= 0, f"engine_power doit être positif"
         return v
+
+
+# endpoint de la prediction du prix d'une voiture
+@app.post("/predict")
+async def predict(features:Features):
+    """Prediction du prix d'une voiture. 
+Exemple de données d'entrée:
+{
+  "model_key": "Citroën",
+  "mileage": 140411,
+  "engine_power": 100,
+  "fuel": "diesel",
+  "paint_color": "black",
+  "car_type": "convertible",
+  "private_parking_available": true,
+  "has_gps": true,
+  "has_air_conditioning": false,
+  "automatic_car": false,
+  "has_getaround_connect": true,
+  "has_speed_regulator": true,
+  "winter_tires": true
+}
+Devrait retourner : "prediction": 106
+
+Toutes les entrées sont sensibles à la casse. 
+La liste des valeurs possibles pour les colonnes catégorielles est disponible dans le endpoint /unique-values. 
+Des valeurs erronées renverront un message d'erreur spécifique."""
+
+    features = dict(features)
+    input_df = pd.DataFrame(columns=['model_key', 'mileage', 'engine_power', 'fuel', 'paint_color','car_type', 'private_parking_available', 'has_gps',
+       'has_air_conditioning', 'automatic_car', 'has_getaround_connect','has_speed_regulator', 'winter_tires'])
+    input_df.loc[0] = list(features.values())
+    # Load the model & preprocessor
+    model = joblib.load('gbr_model.pkl')
+    prep = joblib.load('preprocessor.pkl')
+    X = prep.transform(input_df)
+    pred = model.predict(X)
+    return {"prediction" : pred[0]}
