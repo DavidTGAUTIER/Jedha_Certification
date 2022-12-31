@@ -39,3 +39,57 @@ async def root():
     message = """Bienvenue dans l'API Getaround. Ajoutez /docs à cette adresse pour voir la documentation de l'API sur le dataset contenant les prix des locations"""
     return message
 
+# On definit une classe avec toutes les features pour faire les endpoints sur les predictions
+class Features(BaseModel):
+    model_key: str
+    mileage: Union[int, float]
+    engine_power: Union[int, float]
+    fuel: str
+    paint_color: str
+    car_type: str
+    private_parking_available: bool
+    has_gps: bool
+    has_air_conditioning: bool
+    automatic_car: bool
+    has_getaround_connect: bool
+    has_speed_regulator: bool
+    winter_tires: bool
+
+# Pour toutes les colonnes (exceptées les Bools) on crée des fonctions qui vont tester si les valeurs en input sont correctes
+    @validator('model_key')
+    def model_key_is_valid(cls, v):
+        assert v in ['Citroën', 'Peugeot', 'PGO', 'Renault', 'Audi', 'BMW', 'Ford',
+       'Mercedes', 'Opel', 'Porsche', 'Volkswagen', 'KIA Motors','Alfa Romeo', 'Ferrari', 'Fiat', 'Lamborghini', 'Maserati',
+       'Lexus', 'Honda', 'Mazda', 'Mini', 'Mitsubishi', 'Nissan', 'SEAT','Subaru', 'Toyota', 'Suzuki', 'Yamaha'], \
+        f"model_key doit être une des valeurs de cette liste: ['Citroën', 'Peugeot', 'PGO', 'Renault', 'Audi', 'BMW', 'Ford', \
+       'Mercedes', 'Opel', 'Porsche', 'Volkswagen', 'KIA Motors','Alfa Romeo', 'Ferrari', 'Fiat', 'Lamborghini', 'Maserati', \
+       'Lexus', 'Honda', 'Mazda', 'Mini', 'Mitsubishi', 'Nissan', 'SEAT','Subaru', 'Toyota', 'Suzuki', 'Yamaha']"
+        return v
+
+    @validator('fuel')
+    def fuel_is_valid(cls, v):
+        assert v in ['diesel', 'petrol', 'hybrid_petrol', 'electro'], \
+        f"fuel doit être une des valeurs de cette liste: ['diesel', 'petrol', 'hybrid_petrol', 'electro']"
+        return v
+    
+    @validator('paint_color')
+    def paint_color_is_valid(cls, v):
+        assert v in ['black', 'white', 'red', 'silver', 'grey', 'blue', 'orange','beige', 'brown', 'green'], \
+        f"paint_color doit être une des valeurs de cette liste: ['black', 'white', 'red', 'silver', 'grey', 'blue', 'orange','beige', 'brown', 'green']"
+        return v
+    
+    @validator('car_type')
+    def car_type_is_valid(cls, v):
+        assert v in ['sedan', 'hatchback', 'suv', 'van', 'estate', 'convertible', 'coupe', 'subcompact'], \
+        f"car_type doit être une des valeurs de cette liste: ['sedan', 'hatchback', 'suv', 'van', 'estate', 'convertible', 'coupe', 'subcompact']"
+        return v
+
+    @validator('mileage')
+    def mileage_is_positive(cls, v):
+        assert v >= 0, f"mileage doit être positif"
+        return v
+    
+    @validator('engine_power')
+    def engine_power_is_positive(cls, v):
+        assert v >= 0, f"engine_power doit être positif"
+        return v
