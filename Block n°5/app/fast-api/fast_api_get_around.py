@@ -121,15 +121,23 @@ Toutes les entrées sont sensibles à la casse.
 La liste des valeurs possibles pour les colonnes catégorielles est disponible dans le endpoint /unique-values. 
 Des valeurs erronées renverront un message d'erreur spécifique."""
 
+    # Creation d'un dictionnaire contenant les features et la valeur associée du sample 
     features = dict(features)
-    input_df = pd.DataFrame(columns=['model_key', 'mileage', 'engine_power', 'fuel', 'paint_color','car_type', 'private_parking_available', 'has_gps',
+    # Création du dataframe contenant les features
+    sample_df = pd.DataFrame(columns=['model_key', 'mileage', 'engine_power', 'fuel', 'paint_color','car_type', 'private_parking_available', 'has_gps',
        'has_air_conditioning', 'automatic_car', 'has_getaround_connect','has_speed_regulator', 'winter_tires'])
-    input_df.loc[0] = list(features.values())
-    # Load the model & preprocessor
-    model = joblib.load('gbr_model.pkl')
-    prep = joblib.load('preprocessor.pkl')
-    X = prep.transform(input_df)
-    pred = model.predict(X)
-    return {"prediction" : pred[0]}
+    # Ajout des valeurs du sample au dataframe sample_df
+    sample_df.loc[0] = list(features.values())
+    # Chargement du modèle avec pickle
+    with open('./src/models/gradient_boosting_model', 'rb') as f:
+        gbr_model = pickle.load(f)
+    # Chargement du preprocessor avec joblib
+    preprocessor = joblib.load('preprocessor.pkl')
+    # Application du preprocessing sur sample_df
+    X = preprocessor.transform(sample_df)
+    # On fait les predictions avec le modèle Gradient Boosting Regressor
+    predictions = gbr_model.predict(X)
+    # On observe la prediction faites
+    return {"prediction" : predictions[0]}
 
 
