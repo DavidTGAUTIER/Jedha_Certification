@@ -131,3 +131,5 @@ Des valeurs erronées renverront un message d'erreur spécifique."""
     X = prep.transform(input_df)
     pred = model.predict(X)
     return {"prediction" : pred[0]}
+
+
