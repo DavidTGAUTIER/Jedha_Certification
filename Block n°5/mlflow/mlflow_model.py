@@ -21,9 +21,23 @@ def loading():
     data = data.iloc[:,1:]
     return data
 
-def remove_outliers(data, cols):
+def remove_outliers(data, cols, std=2):
     for col in cols:
         if col == 'engine_power':
+            abs_mean_difference = abs(data['engine_power'] - data['engine_power'].mean())
+            std_mean_difference = abs_mean_difference <= std*data['engine_power'].std()
+            min_values = data['engine_power'] > 50
+            non_outliers = (std_mean_difference) & (min_values)
+            data = data[non_outliers]
+        if col == 'mileage':
+            abs_mean_difference = abs(data['mileage'] - data['mileage'].mean())
+            std_mean_difference = abs_mean_difference <= std*data['mileage'].std()
+            min_values = data['engine_power'] >= 0
+            non_outliers = (std_mean_difference) & (min_values)
+            data = data[non_outliers]
+    return data
+
+
             outliers = 
 
 def preprocessing(data):
