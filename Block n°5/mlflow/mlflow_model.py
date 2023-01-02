@@ -11,9 +11,10 @@ from sklearn.pipeline import Pipeline
 
 from xgboost import XGBRegressor
 
-link = os.environ["APP_URI"]
-mlflow.set_tracking_uri(link)
-print(f'Lien du site mlflow : {link}')
+def mlflow_start():
+    link = os.environ["APP_URI"]
+    mlflow.set_tracking_uri(link)
+    print(f'Lien du site mlflow : {link}')
 
 def loading():
     print('Importation des données')
@@ -98,5 +99,9 @@ def mlflow_training(data, experiment, preprocessor, model_test_name='XGBOOST_tes
         mlflow.log_metric('r2_score_test_set', score_r2)
 
 
-
+if __name__ == "__main__":
+    # initialisation de mlflow
+    mlflow_start()
+    # chargement des données
+    data = loading()
 
