@@ -37,12 +37,16 @@ def remove_outliers(data, cols, std=2):
             data = data[non_outliers]
     return data
 
-def preprocessing(data, test_size=0.2, random_state=123):
-    y = data.pop('rental_price_per_day')
-    X = data
+def train_test_splitting(data, test_size=0.2, random_state=123):
+    df = data.copy()
+    y = df.pop('rental_price_per_day')
+    X = df
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
+    return X_train, X_test, y_train, y_test
 
+def preprocessing(data):
+    X = data.iloc[:,:-1]
     numerical_features, categorical_features = [], []
 
     for col in X.columns:
@@ -55,3 +59,24 @@ def preprocessing(data, test_size=0.2, random_state=123):
         ('num', StandardScaler(), numerical_features),
         ('cat', OneHotEncoder(drop='first'), categorical_features)
     ])
+
+    return preprocessor
+
+def mlflow_tracking(name="getaround-preds"):
+    EXPERIMENT_NAME = name
+    mlflow.set_experiment(EXPERIMENT_NAME)
+    experiment = mlflow.get_experiment_by_name(EXPERIMENT_NAME)
+    print("ID de l'experience :", experiment)
+    return experiment
+
+def mlflow_training(experiment, preprocessor, model_name='XGBOOST'):
+    mlflow.sklearn.autolog(registered_model_name=model_name)
+    with mlflow.start_run(experiment_id=experiment.experiment_id):
+        model = XGBRegressor(eta=0.1, n_estimators=150, min_child_weight=2, gamma=0.7, colsample_bytree=0.4)
+
+        pipeline = Pipeline([
+            ('preprocessing', preprocessor),
+            ('prediction', model)
+        ])
+
+        pipeline.fit()
