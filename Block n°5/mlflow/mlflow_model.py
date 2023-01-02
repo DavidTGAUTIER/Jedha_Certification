@@ -106,5 +106,10 @@ if __name__ == "__main__":
     data = loading()
     # suppression des outliers
     data = remove_outliers(data)
-    
+    # creation du preprocessor
+    preprocessor = preprocessing(data)
+    # mlflow tracking
+    experiment = mlflow_tracking()
+    # mlflow training
+    mlflow_training(data, experiment, preprocessor)
 
