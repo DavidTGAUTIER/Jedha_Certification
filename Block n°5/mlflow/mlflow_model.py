@@ -37,7 +37,6 @@ def remove_outliers(data, cols, std=2):
             data = data[non_outliers]
     return data
 
-
-            outliers = 
-
 def preprocessing(data):
+    y = data.pop('rental_price_per_day')
+    X = data
