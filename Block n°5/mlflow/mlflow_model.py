@@ -37,6 +37,16 @@ def remove_outliers(data, cols, std=2):
             data = data[non_outliers]
     return data
 
-def preprocessing(data):
+def preprocessing(data, test_size=0.2, random_state=123):
     y = data.pop('rental_price_per_day')
     X = data
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size, random_state)
+
+    numerical_features, categorical_features = [], []
+
+    for col in X.columns:
+        if col in X.select_dtypes(include=['float64','int64']):
+            numerical_features.append(col)
+        else:
+            categorical_features.append(col)
