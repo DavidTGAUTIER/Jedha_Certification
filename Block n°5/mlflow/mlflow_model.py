@@ -104,4 +104,7 @@ if __name__ == "__main__":
     mlflow_start()
     # chargement des données
     data = loading()
+    # suppression des outliers
+    data = remove_outliers(data)
+    
 
