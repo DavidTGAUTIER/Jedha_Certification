@@ -69,7 +69,8 @@ def mlflow_tracking(name="getaround-preds"):
     print("ID de l'experience :", experiment)
     return experiment
 
-def mlflow_training(experiment, preprocessor, model_name='XGBOOST'):
+def mlflow_training(data, experiment, preprocessor, model_name='XGBOOST'):
+    X_train, X_test, y_train, y_test = train_test_splitting(data)
     mlflow.sklearn.autolog(registered_model_name=model_name)
     with mlflow.start_run(experiment_id=experiment.experiment_id):
         model = XGBRegressor(eta=0.1, n_estimators=150, min_child_weight=2, gamma=0.7, colsample_bytree=0.4)
