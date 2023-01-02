@@ -69,15 +69,34 @@ def mlflow_tracking(name="getaround-preds"):
     print("ID de l'experience :", experiment)
     return experiment
 
-def mlflow_training(data, experiment, preprocessor, model_name='XGBOOST'):
+def mlflow_training(data, experiment, preprocessor, model_test_name='XGBOOST_testing', model_prod_name='XGBOOST_production'):
+    df = data.copy()
+    y = df.pop('rental_price_per_day')
+    X = df
     X_train, X_test, y_train, y_test = train_test_splitting(data)
+    xgboost = XGBRegressor(eta=0.1, n_estimators=150, min_child_weight=2, gamma=0.7, colsample_bytree=0.4)
+    pipeline = Pipeline([('preprocessing', preprocessor),('prediction', model)])
+
     mlflow.sklearn.autolog(registered_model_name=model_name)
     with mlflow.start_run(experiment_id=experiment.experiment_id):
-        model = XGBRegressor(eta=0.1, n_estimators=150, min_child_weight=2, gamma=0.7, colsample_bytree=0.4)
+        model = xgboost
+        pipe1 = pipeline
+        pipe1.fit(X_train, y_train)
+        y_test_pred = pipe1.predict(X_test)
+        score_r2 = r2_score(y_test, y_test_pred)
+        print('score R2 sur le test set :', score_r2)
+        mlflow.log_metric('r2_score_test_set', score_r2)
 
-        pipeline = Pipeline([
-            ('preprocessing', preprocessor),
-            ('prediction', model)
-        ])
+    mlflow.sklearn.autolog(log_input_examples=True, registered_model_name=model_prod_name)
+    with mlflow.start_run(experiment_id=experiment.experiment_id):
+        model = xgboost
+        pipe2 = pipeline
+        pipe2.fit(X, y)
+        y_test_pred = pipe2.predict(X_test)
+        score_r2 = r2_score(y_test, y_test_pred)
+        print('score R2 sur le test set :', score_r2)
+        mlflow.log_metric('r2_score_test_set', score_r2)
 
-        pipeline.fit()
+
+
+
