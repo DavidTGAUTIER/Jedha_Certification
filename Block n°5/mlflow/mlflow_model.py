@@ -41,7 +41,7 @@ def preprocessing(data, test_size=0.2, random_state=123):
     y = data.pop('rental_price_per_day')
     X = data
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size, random_state)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size, random_state=random_state)
 
     numerical_features, categorical_features = [], []
 
@@ -50,3 +50,8 @@ def preprocessing(data, test_size=0.2, random_state=123):
             numerical_features.append(col)
         else:
             categorical_features.append(col)
+
+    preprocessor = ColumnTransformer([
+        ('num', StandardScaler(), numerical_features),
+        ('cat', OneHotEncoder(drop='first'), categorical_features)
+    ])
