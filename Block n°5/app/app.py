@@ -2,6 +2,10 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import plotly.figure_factory as ff
+import plotly.io as pio
 import copy
 import boto3
 import os
@@ -22,6 +26,20 @@ un véhicule ne s'affichera pas dans les résultats de recherche si les heures d
 
 Nous avons choisi de diviser en deux parties cette analyse:
 la première partie concerne les retards des chauffeurs alors que la seconde partie couvre les types de véhicules et le prix d'une location.""")
+
+st.markdown("""voici les colonnes du dataframe `delay_analysis`:
+* **`rental_id`** : identifiant de la location
+* **`car_id`** : identifiant de la voiture
+* **`checkin_type`** : type de location :
+    * **mobile** : propriétaire / locataire se rencontrent et signent ensemble sur le smartphone du propriétaire
+    * **connect** : pas de rencontre entre propriétaire / locataire (le locataire ouvre le vehicule avec son smartphone)
+* **`state`** : etat de location :
+    * **canceled** : location annulée (on ne connait pas la raison, peut être délais trop important, propriétaire qui a besoin de son véhicule,ect..)
+    * **ended** : location terminée (le locataire à rendu le véhicule au propriétaire)
+* **`delay_at_checkout_in_minutes`** : délais de retard en minutes
+* **`previous_ended_rental_id`** : précédent identifiant de location 
+* **`time_delta_with_previous_rental_in_minutes`** : temps de la précédente location en minutes""")
+
 
 st.sidebar.write("Dashboard made by [@DavidT](https://github.com/DavidTGAUTIER)")
 st.sidebar.success("Navigation")
@@ -70,8 +88,231 @@ data = import_data()
 data_load_state.text("Données disponibles")
 
 # Show raw data
-if st.checkbox('Show raw data'):
-    st.subheader('Raw data')
+if st.checkbox('Montrer les données brutes'):
+    st.subheader('Données brutes')
     st.write(data)
 
+st.markdown(f"Ce jeu de donnée contient {data.shape[0]} lignes et {data.shape[1]} colonnes")
+
+st.markdown("""
+    ------------------------
+""")
+
+data_ended = data.loc[data['state']=='ended',:]
+data_cancel = data.loc[data['state']=='canceled',:]
+data_mobile = data.loc[data['checkin_type']=='mobile',:]
+data_connect = data.loc[data['checkin_type']=='connect',:]
+
+st.subheader("Repartition des données en fonction du statut d'une course et du type de check_in")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("Choisir un type de statut ")
+    statut = st.selectbox("Selectionnez le type de statut", ['canceled & ended', 'ended', 'canceled'])
+    if statut == 'canceled & ended':
+        data = data
+        path, labels = ['state', 'checkin_type'], {'state':'checkin_type'}
+        colors = ['cyan','royalblue']
+        checkin = 'annulées et terminées'
+    elif statut == 'ended':
+        data = data_ended
+        path, labels = ['state', 'checkin_type'], {'state':'checkin_type'}
+        colors = ['cyan','royalblue']
+        checkin = 'terminées'
+    else:
+        data = data_cancel
+        path, labels = ['state', 'checkin_type'], {'state':'checkin_type'}
+        colors = ['royalblue', 'cyan']
+        checkin = 'annulées'
+    fig = px.sunburst(data, path=path, values='time_delta_with_previous_rental_in_minutes', 
+                     color_discrete_sequence=colors, width=600,height=600)
+    fig.update_yaxes(title=f" Courses {checkin} en fonction du type de statut ")
+    st.plotly_chart(fig, use_container_width=True)
+    st.metric("Nombre de samples : ", len(data))
+
+with col2:
+    st.markdown("Choisir un type de checkin")
+    statut2 = st.selectbox("Selectionnez le type de checkin", ['mobile & connect', 'mobile', 'connect'])
+    if statut2 == 'mobile & connect':
+        data = data
+        path, labels2 = ['checkin_type', 'state'], {'checkin_type':'state'}
+        colors = ['cyan','royalblue']
+        checkin = 'mobile et connect'
+    elif statut2 == 'mobile':
+        data = data_mobile
+        path, labels = ['checkin_type', 'state'], {'checkin_type':'state'}
+        colors = ['cyan','royalblue']
+        checkin = 'mobile'
+    else:
+        data = data_connect
+        path, labels = ['checkin_type', 'state'], {'checkin_type':'state'}
+        colors = ['cyan', 'royalblue']
+        checkin = 'connect'
+    fig2 = px.sunburst(data, path=path, values='time_delta_with_previous_rental_in_minutes', 
+                     labels=labels, color_discrete_sequence=colors, width=600,height=600)
+    fig2.update_yaxes(title=f" Courses en fonction du type de check-in : {checkin}")
+    st.plotly_chart(fig2, use_container_width=True)
+    st.metric("Nombre de samples : ", len(data))
+
+st.markdown(""" Le dataset contient plus de courses terminées que de courses annulées. Les courses annulées ont le même ration de check-in 'mobile' ou 'connect' alors que celles qui se sont bien terminées ont plus de check-in de type 'mobile'.
+
+Regardons à présent plus en détail les retards sur ces courses""")
+
+st.markdown("""
+    ------------------------
+""")
+
+st.subheader("Analyse des retards par catégories de tranches horaire en fonction du type de check-in")
+
+fig = go.Figure()
+colors = ['cyan','royalblue', 'darkblue']
+fig.add_trace(go.Bar(x=data_mobile['late_delay'].value_counts().index, y=data_mobile['late_delay'].value_counts(), name='mobile', marker_color='royalblue'))
+fig.add_trace(go.Bar(x=data_connect['late_delay'].value_counts().index, y=data_connect['late_delay'].value_counts(), name='connect', marker_color='cyan'))
+fig.update_layout(
+    title_text="Repartition des retards en fonction du type de check-in (format Bar)",
+    barmode="stack",
+    uniformtext=dict(mode="hide", minsize=10),
+)
+st.plotly_chart(fig, use_container_width=True)
+
+st.markdown(""" Nous pouvons observer que la majorité des retards sont soit plus long que 2heures soit durent moins de 15 minutes. Les retards problématiques sont ceux d'une durée trop importante car ils peuvent occasionner une annulation de la prochaine course.""")
+
+st.subheader("Repartition des retards par catégories de tranches horaire en fonction du statut de retard ")
+
+col1, col2 = st.columns(2)
+df = data[['checkin_type', 'state', 'delay_at_checkout_in_minutes', 'late_delay', 'time_delta_with_previous_rental_in_minutes']].dropna()
+
+with col1:
+    st.markdown(""" Retard avec vue simplifiée """)
+    fig1 = px.sunburst(df, path=['checkin_type', 'state', 'late_delay'], values='time_delta_with_previous_rental_in_minutes',width=700,height=700, 
+    labels={'delais':'time_delta'}, color_discrete_sequence=['cyan','royalblue'])
+    st.plotly_chart(fig1, use_container_width=True)
+
+with col2:
+    st.markdown(""" Retard avec vue détaillée""")
+    fig2 = px.sunburst(df, path=['checkin_type', 'state', 'late_delay', 'delay_at_checkout_in_minutes'], values='time_delta_with_previous_rental_in_minutes',width=700,height=700, 
+    labels={'delais':'time_delta'}, color_discrete_sequence=['cyan','royalblue'])
+    st.plotly_chart(fig2, use_container_width=True)
+
+st.markdown(""" On observe également des retards plus long pour le type de check-in mobile que celui connect : cela peut être du à deux raisons : 
+la première est qu'il y a moins de clients qui prennent un type de check-in mobile, la seconde raison est que ces clients ne vont pas rencontrer en personne le propriétaire ou le nouveau locataire donc ils ont moins de pression à ramener le véhicule à l'heure""")
+
+st.markdown("""
+    ------------------------
+""")
+
+st.subheader("Analyse de la répertition des retards (avec et sans outliers)")
+
+data_early = data[(data['late_delay']=='Early')]
+data_late = data[(data['late_delay']!='Early')]
+
+st.markdown("#### Avec Outliers")
+
+fig = make_subplots(rows=1, cols=2, specs=[[{'type':'box'}, {'type':'box'}]], subplot_titles=("Outliers(log)","Outliers(linear)"))
+fig.add_trace(go.Box(y=data_late["delay_at_checkout_in_minutes"], name='All delays', quartilemethod='linear', boxmean='sd', boxpoints='suspectedoutliers', marker_color='royalblue'),1,1)
+fig.update_yaxes(type="log", row=1, col=1)
+fig.update_traces(quartilemethod="linear", jitter=0)
+fig.add_trace(go.Box(y=data_late["delay_at_checkout_in_minutes"], name='All delays', quartilemethod='linear', boxmean='sd', boxpoints='suspectedoutliers', marker_color='cyan'),1,2)
+fig.update_yaxes(type="linear", row=1, col=2)
+st.plotly_chart(fig, use_container_width=True)
+
+st.markdown("#### Sans Outliers")
+
+fig = make_subplots(rows=1, cols=2, specs=[[{'type':'box'}, {'type':'box'}]], subplot_titles=("Without Outliers > 20k(log)","Without Outliers > 20k(linear)"))
+fig.add_trace(go.Box(y=data[(data['delay_at_checkout_in_minutes']<20000) & (data['late_delay']!='Early')]["delay_at_checkout_in_minutes"], name='delays < 20000', quartilemethod='linear', boxmean='sd', boxpoints='suspectedoutliers', marker_color='royalblue'),1,1)
+fig.update_yaxes(type="log", row=1, col=1)
+fig.update_traces(quartilemethod="linear", jitter=0)
+fig.add_trace(go.Box(y=data[(data['delay_at_checkout_in_minutes']<20000) & (data['late_delay']!='Early')]["delay_at_checkout_in_minutes"], name='delays < 20000', quartilemethod='linear', boxmean='sd', boxpoints='suspectedoutliers', marker_color='cyan'),1,2)
+fig.update_yaxes(type="linear", row=1, col=2)
+st.plotly_chart(fig, use_container_width=True)
+
+st.markdown(""" On remarque des delais hors-norme qui s'etalent sur plus de 40 jours. Il reste quand même beaucoup d'outliers entre 4 et 13jours de retard ce qui vraiment trés long. Peut être est-ce du à un accident ...""")
+
+st.markdown("""Nous allons maintenant analyser les différentes distributions en fonction du type de check-in sans ces outliers""")
+
+st.markdown("""
+    ------------------------
+""")
+
+st.subheader("Distribution des retards en fonction du type de check-in : mobile ou connect (sans outliers)")
+
+remove_outliers = abs(data['delay_at_checkout_in_minutes'] - data['delay_at_checkout_in_minutes'].mean()) <= 2*data['delay_at_checkout_in_minutes'].std()
+data_without_outliers = data.loc[remove_outliers, :]
+
+fig = px.histogram(data_without_outliers, 'delay_at_checkout_in_minutes', nbins=100, color='checkin_type', barmode='overlay', marginal='box', color_discrete_sequence=['cyan','royalblue'])
+st.plotly_chart(fig, use_container_width=True)
+
+st.markdown("""Ces distributions sont quasi-identiques : gaussiennes, centrées sur 0. Par rapport aux tranches horaires, il y a donc autant de retards que d'avance dans le retour des locations. 
+On remarque également qu'il y a plus de retards pour les check-in de type mobile entre 600 et 1800 minutes (ce qui correspond entre 10h et 30h) """)
+
+st.subheader("Avance et retard des utilisateurs en fonction du type de controle : Mobile ou Connect")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    fig1= make_subplots(rows=1, cols=2, specs=[[{'type':'pie'}, {'type':'pie'}]], row_heights=[4])
+    colors = ['cyan','royalblue']
+    values_early = data[data['delay']=='early'].groupby('checkin_type')['delay_at_checkout_in_minutes'].sum().abs()
+    values_lates = data[data['delay']=='late'].groupby('checkin_type')['delay_at_checkout_in_minutes'].sum()
+    fig1.add_trace(go.Pie(labels=values_early.keys(), values=values_early, name="Chauffeur en avance", marker_colors=px.colors.qualitative.Prism), 1, 1)
+    fig1.update_traces(hoverinfo='label+percent', textinfo='value', textfont_size=20, marker=dict(colors=colors, line=dict(color='#000000', width=2)))
+    fig1.add_trace(go.Pie(labels=values_lates.keys(), values=values_lates, name="Chauffeur en retard", marker_colors=px.colors.sequential.Aggrnyl), 1, 2)
+    fig1.update_traces(hoverinfo='label+percent', textinfo='value', textfont_size=20, marker=dict(colors=colors, line=dict(color='#000000', width=2)))
+    fig1.update_traces(hole=.4, hoverinfo="label+percent+name")
+    fig1.update_layout(annotations=[dict(text='En avance', x=0.14, y=0.5, font_size=20, showarrow=False), dict(text='En retard', x=0.855, y=0.5, font_size=20, showarrow=False)])
+    st.plotly_chart(fig1, use_container_width=True)
+
+with col2:
+    fig2 = px.pie(data ,names='delay', facet_col='checkin_type', color_discrete_sequence=['cyan','royalblue'])
+    st.plotly_chart(fig2, use_container_width=True)
+
+
+st.markdown(""" On voit les mêmes phénomènes que sur l'histogramme précédent, à savoir que le type de check-in mobile cause plus de retards donc il serait peut être judicieux de faire payer plus cher ce type de prestations""")
+
+st.markdown(""" Regardons les différences entre les courses terminées et celles qui ont été annulées """)
+
+st.markdown("""
+    ------------------------
+""")
+
+st.subheader("Distribution des retards en fonction du type de check-in : mobile ou connect (sans outliers)")
+
+fig = make_subplots(rows=1, cols=2, subplot_titles=("Courses annulées","Courses terminées"))
+fig.add_trace(go.Histogram(x=data_cancel[data_cancel['checkin_type']=='mobile']['time_delta_with_previous_rental_in_minutes'], marker_color='royalblue', name='mobile'),1,1)
+fig.add_trace(go.Scatter(x=data_cancel[data_cancel['checkin_type']=='mobile']['time_delta_with_previous_rental_in_minutes'].sort_values().unique(), y=data_cancel[data_cancel['checkin_type']=='mobile']['time_delta_with_previous_rental_in_minutes'].value_counts().sort_index(), marker_color='royalblue', fill='tozeroy', showlegend=False),1,1)
+fig.add_trace(go.Histogram(x=data_cancel[data_cancel['checkin_type']=='connect']['time_delta_with_previous_rental_in_minutes'],marker_color='cyan', name='connect'),1,1)
+fig.add_trace(go.Scatter(x=data_cancel[data_cancel['checkin_type']=='connect']['time_delta_with_previous_rental_in_minutes'].sort_values().unique(), y=data_cancel[data_cancel['checkin_type']=='connect']['time_delta_with_previous_rental_in_minutes'].value_counts().sort_index(), marker_color='cyan', fill='tonexty', showlegend=False),1,1)
+fig.add_trace(go.Histogram(x=data_ended[data_ended['checkin_type']=='mobile']['time_delta_with_previous_rental_in_minutes'], marker_color='royalblue', name='mobile', showlegend=False),1,2)
+fig.add_trace(go.Scatter(x=data_ended[data_ended['checkin_type']=='mobile']['time_delta_with_previous_rental_in_minutes'].sort_values().unique(), y=data_ended[data_ended['checkin_type']=='mobile']['time_delta_with_previous_rental_in_minutes'].value_counts().sort_index(), marker_color='royalblue', fill='tonexty', showlegend=False),1,2)
+fig.add_trace(go.Histogram(x=data_ended[data_ended['checkin_type']=='connect']['time_delta_with_previous_rental_in_minutes'],marker_color='cyan', name='connect', showlegend=False),1,2)
+fig.add_trace(go.Scatter(x=data_ended[data_ended['checkin_type']=='connect']['time_delta_with_previous_rental_in_minutes'].sort_values().unique(), y=data_ended[data_ended['checkin_type']=='connect']['time_delta_with_previous_rental_in_minutes'].value_counts().sort_index(), marker_color='cyan', fill='tozeroy', showlegend=False),1,2)
+st.plotly_chart(fig, use_container_width=True)
+
+st.markdown("Choisir un type de state")
+statut = st.selectbox("Selectionnez le type de statut", ['canceled', 'ended'])
+if statut == 'canceled':
+    data = data_cancel
+else:
+    data = data_ended
+fig = px.histogram(data ,x='time_delta_with_previous_rental_in_minutes', nbins=100, color='checkin_type', color_discrete_sequence=['cyan','royalblue'])
+fig.update_yaxes(title=f" Courses en fonction du type de statut : {statut}")
+st.plotly_chart(fig, use_container_width=True)
+
+st.markdown("""Les deux distributions sont similaires et nous ne pouvons pas conclure d'une différence significative.. en revanche, on se rend compte que la plupart des courses précédentes sont très courtes en terme de durée : cela chute de manière exponentielle et remonte légèrement après 400 minutes""")
+
+st.markdown("""Regardons les sommes cumulées des retards pour observer une différence ou non""")
+
+st.markdown("""#### Somme cumulée des retards""")
+
+fig = px.histogram(data_ended, x='time_delta_with_previous_rental_in_minutes', histnorm='percent',cumulative=True, marginal='box', color = 'checkin_type', barmode='overlay', color_discrete_sequence=['cyan','royalblue'])
+st.plotly_chart(fig, use_container_width=True)
+
+st.markdown("""Il n'y a pas de différences entre le type de check-in `mobile` ou `connect` : les sommes cumulées sont bien réparties et montent de manière croissante (pas de pic exponentiel) en fonction de la durée des anciennes courses.""")
+
+st.markdown("""Analysons cette fois-ci sans les outliers(cad sans les données qui sont plus de deux ecarts-types de la moyenne)""")
+
+st.markdown("""
+    ------------------------
+""")
 
