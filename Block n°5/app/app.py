@@ -473,4 +473,11 @@ fig.update_layout(
     
 st.plotly_chart(fig, use_container_width=True)
 
-st.markdown(""" """)
+st.markdown(""" Plus nous mettons un délais de retard important, et plus les véhicules sont disponibles. Alors que, pour la totalité des véhicules, il y a plus de retard avec les type de check-in `mobile` que `connect`,
+on remarque une inversion de cette tendance : plus on prend des delais de retard important, et plus l'ecart qu'il y avait en terme de retard entre `mobile` et `connect` se réduit jusqu'a s'inverser et devenir majoritaire 
+pour le type `connect`.
+
+Nous allons essayer de créer un seuil qui permettrait de trouver un compromis entre un delais d'attente volontaire pour éviter les retards mais qui pénaliserait l'argent que le propriétaire pourrait empocher, et cette
+argent perdu qui ferait que si ce délais est trop long, le propriétaire perdrait trop d'argent. Il existe donc un juste milieu à trouver entre delais et argent.
+
+Nous pouvons commencer notre recherche du seuil optimal""")
