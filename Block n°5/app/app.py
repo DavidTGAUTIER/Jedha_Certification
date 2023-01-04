@@ -16,15 +16,21 @@ st.title("Analyse des retards")
 
 st.markdown("""Dashboard pour le projet GetAround.
 
-Il contient une analyse des durées de deplacements des chauffeurs utilisant l'application GetAround. </br>
+Il contient une analyse des durées de deplacements des chauffeurs utilisant l'application GetAround. 
 Comme certains chauffeurs rendent les véhicules en retard, le but de ce projet est de mettre en place un **délai minimum entre deux locations** : \n
 un véhicule ne s'affichera pas dans les résultats de recherche si les heures d'enregistrement ou de départ demandées sont trop proches d'une location déjà réservée **sans que cela pénalise financièrement les propriétaires de ces véhicules**.
 
-Nous avons choisi de diviser en deux parties cette analyse:</br>
-la première partie concerne les retards des chauffeurs alors que la seconde partie couvre les types de véhicules et le prix d'une location."""
+Nous avons choisi de diviser en deux parties cette analyse:
+la première partie concerne les retards des chauffeurs alors que la seconde partie couvre les types de véhicules et le prix d'une location.""")
 
 st.sidebar.write("Dashboard made by [@DavidT](https://github.com/DavidTGAUTIER)")
 st.sidebar.success("Navigation")
+
+st.markdown("""
+    ------------------------
+""")
+
+st.header("Chargement des données")
 
 
 aws=False
@@ -54,10 +60,14 @@ if aws:
 
 if local:
     @st.cache
-    # Importation des données depuis AWS s3
+    # Importation des données depuis environnement local
     def import_data():
-        data = pd.read_csv('../src/delays_cleaned.csv')
+        data = pd.read_csv('./src/delays_cleaned.csv')
         return data
+
+data_load_state = st.text('Chargement des données...')
+data = import_data()
+data_load_state.text("Données disponibles")
 
 # Show raw data
 if st.checkbox('Show raw data'):
