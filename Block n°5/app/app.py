@@ -422,4 +422,6 @@ st.markdown("""On remarque encore une fois une stabilité dans la différence en
 Nous avons précédemment créer un dataframe en excluant les outliers, cad les valeurs qui sont à +- 2 écarts types de la moyenne 
 mais il nous faut vérifier certains resultats
 
-""")
+Il existe une sorte de plateau qui est atteint plus rapidement avec le type de check-in `Connect`, entre 120 et 180 minutes.
+
+On peut donc choisir un seuil entre ces deux valeurs""")
