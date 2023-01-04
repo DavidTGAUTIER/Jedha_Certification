@@ -462,7 +462,7 @@ fig.update_traces(hole=.4, hoverinfo="label+percent+name")
 fig.update_layout(
     title_text="Retard entre deux courses en fonction du type de check-in",
     # Add annotations in the center of the donut pies.
-    annotations=[dict(text='Pas de retard', x=-0.05, y=0.50, font_size=26, showarrow=False),
+    annotations=[dict(text='Pas de retard', x=-0.10, y=0.50, font_size=26, showarrow=False),
                  dict(text='< 60 min', x=0.20, y=0.50, font_size=26, showarrow=False),
                  dict(text='< 120 min', x=0.49, y=0.50, font_size=26, showarrow=False),
                  dict(text='< 180 min', x=0.80, y=0.50, font_size=26, showarrow=False),
