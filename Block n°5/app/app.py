@@ -432,3 +432,6 @@ st.markdown("""
 
 st.subheader("Distribution des retards dans un range de plus ou moins 4 heures")
 
+data_without_outliers_range = data_without_outliers[(data_without_outliers['delay_at_checkout_in_minutes'] > -240) & (data_without_outliers['delay_at_checkout_in_minutes'] < 240)]
+fig = px.histogram(data_without_outliers_range, x='delay_at_checkout_in_minutes', color='checkin_type', barmode='overlay', marginal='box', color_discrete_sequence=['cyan','royalblue'])
+st.plotly_chart(fig, use_container_width=True)
