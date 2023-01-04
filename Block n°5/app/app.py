@@ -422,6 +422,13 @@ st.markdown("""On remarque encore une fois une stabilité dans la différence en
 Nous avons précédemment créer un dataframe en excluant les outliers, cad les valeurs qui sont à +- 2 écarts types de la moyenne 
 mais il nous faut vérifier certains resultats
 
-Il existe une sorte de plateau qui est atteint plus rapidement avec le type de check-in `Connect`, entre 120 et 180 minutes.
+Il existe une sorte de plateau qui est atteint plus rapidement avec le type de check-in `Connect`, entre 120 et 180 minutes. On peut donc choisir un seuil entre ces deux valeurs
 
-On peut donc choisir un seuil entre ces deux valeurs""")
+En comparant le minimum et le maximum des retards en minutes sans les outliers, cela fait +- 30 heures maximum. C'est trop et nous souhaitons voir la distribution de ce dataset. Nous allons supprimer ces valeurs pour ne garder qu'un range de valeurs entre -4h et 4h""")
+
+st.markdown("""
+    ------------------------
+""")
+
+st.subheader("Distribution des retards dans un range de plus ou moins 4 heures")
+
