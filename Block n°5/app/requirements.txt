@@ -8,6 +8,7 @@ openpyxl
 boto 
 boto3
 google-cloud-storage
+scipy
 
 
 

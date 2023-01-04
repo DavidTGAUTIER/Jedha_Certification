@@ -4,6 +4,7 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import scipy
 import plotly.figure_factory as ff
 import plotly.io as pio
 import copy
@@ -155,7 +156,7 @@ with col2:
     st.plotly_chart(fig2, use_container_width=True)
     st.metric("Nombre de samples : ", len(data))
 
-st.markdown(""" Le dataset contient plus de courses terminées que de courses annulées. Les courses annulées ont le même ration de check-in 'mobile' ou 'connect' alors que celles qui se sont bien terminées ont plus de check-in de type 'mobile'.
+st.markdown(""" Le dataset contient plus de courses terminées que de courses annulées. Les courses annulées ont le même ration de check-in `mobile` ou `connect` alors que celles qui se sont bien terminées ont plus de check-in de type 'mobile'.
 
 Regardons à présent plus en détail les retards sur ces courses""")
 
@@ -235,7 +236,7 @@ st.markdown("""
     ------------------------
 """)
 
-st.subheader("Distribution des retards en fonction du type de check-in : mobile ou connect (sans outliers)")
+st.subheader("Distribution des retards en fonction du type de check-in : `mobile` ou `connect` (sans outliers)")
 
 remove_outliers = abs(data['delay_at_checkout_in_minutes'] - data['delay_at_checkout_in_minutes'].mean()) <= 2*data['delay_at_checkout_in_minutes'].std()
 data_without_outliers = data.loc[remove_outliers, :]
@@ -243,8 +244,8 @@ data_without_outliers = data.loc[remove_outliers, :]
 fig = px.histogram(data_without_outliers, 'delay_at_checkout_in_minutes', nbins=100, color='checkin_type', barmode='overlay', marginal='box', color_discrete_sequence=['cyan','royalblue'])
 st.plotly_chart(fig, use_container_width=True)
 
-st.markdown("""Ces distributions sont quasi-identiques : gaussiennes, centrées sur 0. Par rapport aux tranches horaires, il y a donc autant de retards que d'avance dans le retour des locations. 
-On remarque également qu'il y a plus de retards pour les check-in de type mobile entre 600 et 1800 minutes (ce qui correspond entre 10h et 30h) """)
+st.markdown("""Ces distributions sont quasi-identiques : `gaussiennes`, `centrées sur 0`. Par rapport aux tranches horaires, il y a donc autant de retards que d'avance dans le retour des locations. 
+On remarque également qu'il y a plus de retards pour les check-in de type `mobile` entre 600 et 1800 minutes (ce qui correspond entre 10h et 30h) """)
 
 st.subheader("Avance et retard des utilisateurs en fonction du type de controle : Mobile ou Connect")
 
@@ -268,7 +269,7 @@ with col2:
     st.plotly_chart(fig2, use_container_width=True)
 
 
-st.markdown(""" On voit les mêmes phénomènes que sur l'histogramme précédent, à savoir que le type de check-in mobile cause plus de retards donc il serait peut être judicieux de faire payer plus cher ce type de prestations""")
+st.markdown(""" On voit les mêmes phénomènes que sur l'histogramme précédent, à savoir que le type de check-in `mobile` cause plus de retards donc il serait peut être judicieux de faire payer plus cher ce type de prestations""")
 
 st.markdown(""" Regardons les différences entre les courses terminées et celles qui ont été annulées """)
 
@@ -276,7 +277,7 @@ st.markdown("""
     ------------------------
 """)
 
-st.subheader("Distribution des retards en fonction du type de check-in : mobile ou connect (sans outliers)")
+st.subheader("Distribution des retards en fonction du type de check-in : mobile ou connect (avec outliers)")
 
 fig = make_subplots(rows=1, cols=2, subplot_titles=("Courses annulées","Courses terminées"))
 fig.add_trace(go.Histogram(x=data_cancel[data_cancel['checkin_type']=='mobile']['time_delta_with_previous_rental_in_minutes'], marker_color='royalblue', name='mobile'),1,1)
@@ -316,3 +317,66 @@ st.markdown("""
     ------------------------
 """)
 
+st.subheader("Distribution des retards en fonction du type de check-in : mobile ou connect (sans outliers)")
+
+pairplot_df = data_without_outliers[['state','delay_at_checkout_in_minutes','time_delta_with_previous_rental_in_minutes']]
+pairplot_df = pairplot_df.rename(columns={'delay_at_checkout_in_minutes':'delays_minutes', 'time_delta_with_previous_rental_in_minutes':'time_delta'})
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown(""" Retard des courses actuelles """)
+    fig1 = ff.create_distplot([pairplot_df['delays_minutes'].dropna().sort_values().values], group_labels=['delays_minutes'])
+    st.plotly_chart(fig1, use_container_width=True)
+with col2:
+    st.markdown(""" Retards des courses passées""")
+    fig2 = ff.create_distplot([pairplot_df['time_delta'].dropna().values], group_labels=['time_delta'])
+    st.plotly_chart(fig2, use_container_width=True)
+
+st.markdown("""On voit une distribution normale comme celle que nous venons de voir, moyenne nulle et centrée sur 0. Nous avons choisi un range entre -2000 / 2000 minutes, ce qui correspond à +- 33 heures. 
+En ce qui concerne les retards des courses passées, il y a seulement 27 valeurs pour ces courses, cela correspond à des types de seuils. Nous nous retrouvons avec un graphique en batons avec deux pics.
+
+Observons plus en détail ces distributions""")
+
+plot_rows=3
+plot_cols=2
+fig = make_subplots(rows=plot_rows, cols=plot_cols, subplot_titles=("Delays","TimeDelta"))
+
+# plotly traces
+fig.add_trace(go.Histogram(x=pairplot_df['delays_minutes'], marker_color='royalblue'), row=1, col=1)
+fig.add_trace(go.Scatter(x=pairplot_df['delays_minutes'].sort_values(), y=pairplot_df['time_delta'], mode='markers', marker_color='royalblue'), row=2, col=1)
+fig.add_trace(go.Histogram(x=pairplot_df['time_delta'].sort_values(), nbinsx=25, marker_color='cyan'), row=1, col=2)
+fig.add_trace(go.Scatter(x=pairplot_df['time_delta'].sort_values(), y=pairplot_df['delays_minutes'], mode='markers', marker_color='cyan'), row=2, col=2)
+fig.add_trace(go.Scatter(x=pairplot_df.index, y=pairplot_df['delays_minutes'].value_counts(), marker_color='royalblue'), row=3, col=1)
+fig.add_trace(go.Scatter(x=pairplot_df.index, y=pairplot_df['time_delta'].value_counts(), marker_color='cyan'), row=3, col=2)
+fig.update_layout(
+    showlegend=False,
+    title_text="Retards des anciennes et des nouvelles courses")
+st.plotly_chart(fig, use_container_width=True)
+
+st.markdown("""Il y a plus de valeurs centrées sur 0 pour les nouvelles que les anciennes courses. La distribution des anciennes courses est un peu plus 'chaotique', dans le sens ou il n'y a pas beaucoup de valeurs différentes, 
+cette colonne contenant + 90% de valeurs manquantes n'aide pas à se faire une bonne représentation des retards passés. On observe bien deux pics : un aux alentours des 30-50 minutes de retard et le second vers 700min (11heures).
+
+Observons la distribution des anciens retards plus en détails""") 
+
+index = data['time_delta_with_previous_rental_in_minutes'].value_counts().index
+values = data['time_delta_with_previous_rental_in_minutes'].value_counts().values
+
+fig = px.bar(x=index, y=values, color_discrete_sequence=['royalblue'])
+fig.update_yaxes(title='Nombre de chauffeurs en retard (count)')
+fig.update_xaxes(title='Time delta')
+st.plotly_chart(fig, use_container_width=True)
+
+st.markdown("""Pour `time_delta_with_previous_rental_in_minutes`, on remarque un creux à 400 minutes, et deux ou trois pics au début et à la fin.
+
+Si on mettait en place un seuil entre le départ et le nouvel enregistrement, combien de chauffeurs seraient concernés ?
+
+Nous allons essayer de determiner un seuil pour répérer la frequence de chauffeurs qui rendent leur véhicule en retard après avoir pris un retard. Pour cela, nous prenons les valeurs de `time_delta_with_previous_rental_in_minutes` et on retranche la somme des valeurs pour créer des catégories de retards
+
+On remarque egalement que plus les retard sont long, plus il y a de personnes qui rendent leur véhicule en retard.
+
+On va créer plusieurs seuil en fonction du type de check-in : soit `mobile` soit `connect` pour se rendre compte celui qui a le plus d'influence sur les retards.
+ Pour cela, on selectionne seulement les courses qui se sont bien terminées (qui n'ont pas été annulées). 
+ Il faut savoir qu'il existe 26 valeurs de retards dans la catégorie `Time delta` (25 pour être exacte car le 26e est la valeur NaN).
+  Pour chaque valeur (seuil) de retard, et pour chaque type de check-in(`mobile` ou `connect`), on compte le nombre de courses qui ont été en retard et on fait la somme cumulée pour avoir un graphique qui représente le nombre de courses affectées par ces retards
+""")
