@@ -436,4 +436,41 @@ data_without_outliers_range = data_without_outliers[(data_without_outliers['dela
 fig = px.histogram(data_without_outliers_range, x='delay_at_checkout_in_minutes', color='checkin_type', barmode='overlay', marginal='box', color_discrete_sequence=['cyan','royalblue'])
 st.plotly_chart(fig, use_container_width=True)
 
-st.markdown("""Plus on réduit le range des tranches horaires d'études, plus on supprime les outliers et plus le type de check-in `mobile` crée des retards sur les courses.""")
+st.markdown("""Plus on réduit le range des tranches horaires d'études, plus on supprime les outliers et plus le type de check-in `mobile` crée des retards sur les courses.
+
+Testons en regardant par tranche horaire de 30 minutes la différence de retard :""")
+
+specs = np.repeat({'type':'pie'}, 10).reshape(2, 5).tolist()
+fig = make_subplots(rows=2, cols=5, specs=specs)
+range_minutes = np.linspace(0, 240, 5)
+colors = ['cyan','royalblue']
+i,j = 0,1
+
+for ranges in range_minutes:
+    advance_connect = len(data_connect[data_connect['delay_at_checkout_in_minutes'] < ranges])
+    delays_connect = len(data_connect[data_connect['delay_at_checkout_in_minutes'] >= ranges])
+    advance_mobile = len(data_mobile[data_mobile['delay_at_checkout_in_minutes'] < ranges])
+    delays_mobile = len(data_mobile[data_mobile['delay_at_checkout_in_minutes'] >= ranges])
+  
+    fig.add_trace(go.Pie(labels=['Disponible', 'Non disponible'], values=[advance_connect, delays_connect], name=f"{ranges} minutes between ck_in & check out"), j, i+1)
+    fig.update_traces(hoverinfo='label+percent', textinfo='value', textfont_size=20, marker=dict(colors=colors, line=dict(color='#000000', width=2)))
+    fig.add_trace(go.Pie(labels=['Disponible', 'Non disponible'], values=[advance_mobile, delays_mobile], name=f"{ranges} minutes between ck_in & check out"), j+1, i+1)
+    fig.update_traces(hoverinfo='label+percent', textinfo='value', textfont_size=20, marker=dict(colors=colors, line=dict(color='#000000', width=2)))
+    i+=1
+fig.update_traces(hole=.4, hoverinfo="label+percent+name")
+    
+fig.update_layout(
+    title_text="Retard entre deux courses en fonction du type de check-in",
+    # Add annotations in the center of the donut pies.
+    annotations=[dict(text='Pas de retard', x=-0.05, y=0.50, font_size=26, showarrow=False),
+                 dict(text='< 60 min', x=0.20, y=0.50, font_size=26, showarrow=False),
+                 dict(text='< 120 min', x=0.49, y=0.50, font_size=26, showarrow=False),
+                 dict(text='< 180 min', x=0.80, y=0.50, font_size=26, showarrow=False),
+                 dict(text='> 240 min', x=1.02, y=0.50, font_size=26, showarrow=False),
+                 dict(text='mobile', x=-0.10, y=1, font_size=38, showarrow=False,textangle=-90),
+                 dict(text='connect', x=-0.10, y=-0.05, font_size=38, showarrow=False, textangle=-90),
+                ])
+    
+st.plotly_chart(fig, use_container_width=True)
+
+st.markdown(""" """)
