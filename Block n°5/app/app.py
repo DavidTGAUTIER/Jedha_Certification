@@ -466,9 +466,9 @@ fig.update_layout(
                  dict(text='< 60 min', x=0.245, y=0.50, font_size=26, showarrow=False),
                  dict(text='< 120 min', x=0.50, y=0.50, font_size=26, showarrow=False),
                  dict(text='< 180 min', x=0.76, y=0.50, font_size=26, showarrow=False),
-                 dict(text='> 240 min', x=1, y=0.50, font_size=26, showarrow=False),
-                 dict(text='mobile', x=-0.10, y=1, font_size=38, showarrow=False,textangle=-90),
-                 dict(text='connect', x=-0.10, y=-0.05, font_size=38, showarrow=False, textangle=-90),
+                 dict(text='> 240 min', x=0.99, y=0.50, font_size=26, showarrow=False),
+                 dict(text='mobile', x=0, y=1, font_size=38, showarrow=False,textangle=-90),
+                 dict(text='connect', x=0, y=-0.05, font_size=38, showarrow=False, textangle=-90),
                 ])
     
 st.plotly_chart(fig, use_container_width=True)
