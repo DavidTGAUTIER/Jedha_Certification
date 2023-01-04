@@ -14,25 +14,54 @@ st.set_page_config(
 
 st.title("Analyse des retards")
 
-@st.cache
-# Importation des données depuis AWS s3
-def import_data():
+st.markdown("""Dashboard pour le projet GetAround.
 
-    client = boto3.client(
-        "s3",
-        aws_access_key_id = os.getenv("s3_key"),
-        aws_secret_access_key=os.getenv("s3_secret")
-    )
+Il contient une analyse des durées de deplacements des chauffeurs utilisant l'application GetAround. </br>
+Comme certains chauffeurs rendent les véhicules en retard, le but de ce projet est de mettre en place un **délai minimum entre deux locations** : \n
+un véhicule ne s'affichera pas dans les résultats de recherche si les heures d'enregistrement ou de départ demandées sont trop proches d'une location déjà réservée **sans que cela pénalise financièrement les propriétaires de ces véhicules**.
 
-    response = client.get_object(Bucket = "app-getaround",
-                                 Key = "get_around_delay_analysis.csv")
-        
-    status = response.get("ResponseMetadata", {}).get("HTTPStatusCode")
+Nous avons choisi de diviser en deux parties cette analyse:</br>
+la première partie concerne les retards des chauffeurs alors que la seconde partie couvre les types de véhicules et le prix d'une location."""
 
-    if status != 200:
-        return f"Erreur de connexion avec AWS s3 - Status code :{status}"
+st.sidebar.write("Dashboard made by [@DavidT](https://github.com/DavidTGAUTIER)")
+st.sidebar.success("Navigation")
 
-    else:
-        return pd.read_csv(response.get("Body"))
+
+aws=False
+local=True
+
+if aws:
+    @st.cache
+    # Importation des données depuis AWS s3
+    def import_data():
+
+        client = boto3.client(
+            "s3",
+            aws_access_key_id = os.getenv("s3_key"),
+            aws_secret_access_key=os.getenv("s3_secret")
+        )
+
+        response = client.get_object(Bucket = "app-getaround",
+                                    Key = "get_around_delay_analysis.csv")
+            
+        status = response.get("ResponseMetadata", {}).get("HTTPStatusCode")
+
+        if status != 200:
+            return f"Erreur de connexion avec AWS s3 - Status code :{status}"
+
+        else:
+            return pd.read_csv(response.get("Body"))
+
+if local:
+    @st.cache
+    # Importation des données depuis AWS s3
+    def import_data():
+        data = pd.read_csv('../src/delays_cleaned.csv')
+        return data
+
+# Show raw data
+if st.checkbox('Show raw data'):
+    st.subheader('Raw data')
+    st.write(data)
 
 
