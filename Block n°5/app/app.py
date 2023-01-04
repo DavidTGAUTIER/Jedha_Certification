@@ -380,3 +380,46 @@ On va créer plusieurs seuil en fonction du type de check-in : soit `mobile` soi
  Il faut savoir qu'il existe 26 valeurs de retards dans la catégorie `Time delta` (25 pour être exacte car le 26e est la valeur NaN).
   Pour chaque valeur (seuil) de retard, et pour chaque type de check-in(`mobile` ou `connect`), on compte le nombre de courses qui ont été en retard et on fait la somme cumulée pour avoir un graphique qui représente le nombre de courses affectées par ces retards
 """)
+
+st.markdown("""
+    ------------------------
+""")
+
+st.subheader("Observation du seuil qui affecte les locations de véhicule en fonction du retard")
+
+seuil_mobile, seuil_connect = [],[]
+for el in data['time_delta_with_previous_rental_in_minutes'].unique():
+    seuil_mobile.append(sum(data_mobile['time_delta_with_previous_rental_in_minutes'] < el)*100/len(data_ended))
+    seuil_connect.append(sum(data_connect['time_delta_with_previous_rental_in_minutes'] < el)*100/len(data_ended))
+seuil_total = [x+y for x, y in zip(seuil_mobile, seuil_connect)]
+
+plot_rows=1
+plot_cols=2
+newnames = {'wide_variable_0':'mobile', 'wide_variable_1': 'connect', 'wide_variable_2': 'sum'}
+fig = make_subplots(rows=plot_rows, cols=plot_cols, subplot_titles=("",""), shared_xaxes=True)
+fig.add_trace(go.Bar(x=data['time_delta_with_previous_rental_in_minutes'].unique(), y=seuil_mobile, name="mobile", marker_color='royalblue'), row=1, col=1)
+fig.add_trace(go.Bar(x=data['time_delta_with_previous_rental_in_minutes'].unique(), y=seuil_connect, name="connect", marker_color='cyan'), row=1, col=1)
+fig.add_trace(go.Bar(x=data['time_delta_with_previous_rental_in_minutes'].unique(), y=seuil_total, name="total", marker_color='darkblue'), row=1, col=1)
+fig.update_yaxes(title='Pourcentage de locations affectées')
+fig.update_xaxes(title='Time Delta')
+fig.add_trace(go.Scatter(x=data['time_delta_with_previous_rental_in_minutes'].unique(), y=seuil_total, mode='markers', showlegend=False, marker_color='darkblue'), row=1, col=2)
+fig.add_trace(go.Scatter(x=data['time_delta_with_previous_rental_in_minutes'].unique(), y=seuil_mobile, mode='markers', showlegend=False, marker_color='royalblue'), row=1, col=2)
+fig.add_trace(go.Scatter(x=data['time_delta_with_previous_rental_in_minutes'].unique(), y=seuil_connect, mode='markers', showlegend=False, marker_color='cyan'), row=1, col=2)
+fig.add_trace(go.Histogram(y=seuil_mobile*10, name="mobile", nbinsx=20, marker_color='royalblue', showlegend=False), row=1, col=2)
+fig.add_trace(go.Histogram(y=seuil_connect*10, name="connect", marker_color='cyan', showlegend=False), row=1, col=2)
+st.plotly_chart(fig, use_container_width=True)
+
+newnames = {'wide_variable_0':'mobile', 'wide_variable_1': 'connect', 'wide_variable_2': 'sum'}
+fig = px.bar(x=data['time_delta_with_previous_rental_in_minutes'].unique(), y=[seuil_mobile, seuil_connect, seuil_total], labels=newnames, color_discrete_sequence=['cyan','royalblue', 'darkblue'])
+fig.update_yaxes(title='Pourcentage de locations affectées')
+fig.update_xaxes(title='Time Delta')
+fig.for_each_trace(lambda t: t.update(name = newnames[t.name], legendgroup = newnames[t.name],
+                                      hovertemplate = t.hovertemplate.replace(t.name, newnames[t.name])))
+st.plotly_chart(fig, use_container_width=True)
+
+st.markdown("""On remarque encore une fois une stabilité dans la différence entre le type de check-in. On retrouve les 8% des valeurs correspondantes aux annulations.
+
+Nous avons précédemment créer un dataframe en excluant les outliers, cad les valeurs qui sont à +- 2 écarts types de la moyenne 
+mais il nous faut vérifier certains resultats
+
+""")
