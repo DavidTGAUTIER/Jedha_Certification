@@ -422,9 +422,9 @@ for col in df_without_outliers.select_dtypes(bool):
 fig.update_layout(
     title_text=" Proportion des Variables boolean ",
     # Add annotations in the center of the donut pies.
-    annotations=[dict(text=s[0], x=-0.03, y=-0.05, font_size=12, showarrow=False, textangle=-45),
-                 dict(text=s[1], x=0.14, y=0.15, font_size=12, showarrow=False, textangle=-45),
-                 dict(text=s[2], x=0.23, y=-0.03, font_size=12, showarrow=False, textangle=-45),
+    annotations=[dict(text=s[0], x=-0.03, y=-0.12, font_size=12, showarrow=False, textangle=-45),
+                 dict(text=s[1], x=0.18, y=0.05, font_size=12, showarrow=False, textangle=-45),
+                 dict(text=s[2], x=0.27, y=-0.12, font_size=12, showarrow=False, textangle=-45),
                  dict(text=s[3], x=0.47, y=0.06, font_size=12, showarrow=False, textangle=-45),
                  dict(text=s[4], x=0.58, y=-0.08, font_size=12, showarrow=False, textangle=-45),
                  dict(text=s[5], x=0.80, y=-0.03, font_size=12, showarrow=False, textangle=-45),
