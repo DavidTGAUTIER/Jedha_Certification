@@ -481,19 +481,3 @@ pour le type `connect`.""")
 st.markdown("""
     ------------------------
 """)
-
-#st.subheader("A la recherche du seuil optimal pour optimiser la rentabilité des courses")
-
-#st.markdown("""Pour améliorer l'expérience de l'utilisateur, nous devons répondre à ces questions :
-
-#* Combien d'argent perd un propriétaire de véhicule à cause des retards ?
-#* Comment quantifier le ratio risques/bénéfices ?
-#* Quel seuil devrions nous utiliser pour améliorer le ratio risques/bénéfices ?
-
-#Nous allons prendre une durée de location égale à 24h.
-
-#Nous avons le choix de prendre la median ou la moyenne pour connaitre le prix (moyen ou median) d'une course. Regardons la distribution de cette variable""")
-
-
-
-
