@@ -75,9 +75,11 @@ if local:
     path_pricing = './src/pricing_cleaned.csv'
     path_delays = './src/delays_cleaned.csv'
 
-    data_pricing = import_data(path_normal)
+    data_pricing = import_data(path_pricing)
     data_delays = import_data(path_delays)
 
-fig = px.histogram(pricing['rental_price_per_day'], color_discrete_sequence=['cyan','royalblue'])
+data_load_state.text("Données disponibles")
+
+fig = px.histogram(data_pricing['rental_price_per_day'], color_discrete_sequence=['cyan','royalblue'])
 st.plotly_chart(fig, use_container_width=True)
    
