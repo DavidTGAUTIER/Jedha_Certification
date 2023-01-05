@@ -425,10 +425,10 @@ fig.update_layout(
     annotations=[dict(text=s[0], x=-0.03, y=-0.17, font_size=12, showarrow=False, textangle=-45),
                  dict(text=s[1], x=0.18, y=0.06, font_size=12, showarrow=False, textangle=-45),
                  dict(text=s[2], x=0.29, y=-0.11, font_size=12, showarrow=False, textangle=-45),
-                 dict(text=s[3], x=0.48, y=0, font_size=12, showarrow=False, textangle=-45),
-                 dict(text=s[4], x=0.62, y=-0.14, font_size=12, showarrow=False, textangle=-45),
-                 dict(text=s[5], x=0.80, y=-0.07, font_size=12, showarrow=False, textangle=-45),
-                 dict(text=s[6], x=0.95, y=0.03, font_size=12, showarrow=False, textangle=-45),
+                 dict(text=s[3], x=0.48, y=-0.02, font_size=12, showarrow=False, textangle=-45),
+                 dict(text=s[4], x=0.59, y=-0.14, font_size=12, showarrow=False, textangle=-45),
+                 dict(text=s[5], x=0.80, y=-0.12, font_size=12, showarrow=False, textangle=-45),
+                 dict(text=s[6], x=0.95, y=-0.02, font_size=12, showarrow=False, textangle=-45),
                 ])
 
 fig.update_traces(hoverinfo='label+percent', textinfo='value', textfont_size=12,
