@@ -80,6 +80,29 @@ if local:
 
 data_load_state.text("Données disponibles")
 
+st.markdown("""
+    ------------------------
+""")
+
+st.subheader("Analyse de fond sur la determination d'un seuil de rentabilité")
+
 fig = px.histogram(data_pricing['rental_price_per_day'], color_discrete_sequence=['cyan','royalblue'])
 st.plotly_chart(fig, use_container_width=True)
    
+st.markdown("""Comme nous sommes sur une distribution gaussienne, la moyenne et la median sont equivalente donc nous prendrons la moyenne.
+
+Pour connaitre le cout total des annulations, nous pouvons prendre le prix moyen d'une course multiplié par la totalité des courses annulées : on obtient une perte totale de revenu pour l'ensemble des locations de 395765$""")
+
+st.markdown("""Notre objectif est d'optimiser les revenus des propriétaires. Nous devons assumer le fait que toutes les annulations de location sont dues à des retards et qu'aucun propriétaire ne gagne de l'argent après l'heure de départ prévue. De plus, si il y  a le moindre retard, un utilisateur va annuler sa course
+Par la suite, nous ne prendrons que les valeurs qui ne sont pas des `NaN`.
+
+Pour un départ tardif, 9404 courses ont coutées 159737$ si nous nous basons sur un tarif à la minute. Nous pouvons donc diminuer la perte totale des revenus en faisant payer le temps supplémentaire par un tarif à la minute dés qu'il y a un retard.
+Pour cela, nous allons retrancher le prix qu'aurait rapporté les retards par rapport à la perte totale liées aux retards""")
+
+st.markdown("""Les pertes s'élèvent à un montant de 236028$ pour une durée de 24h. Nous obtenons un montant de pertes liées aux retards par heure donc pour connaitre la valeur de ce montant par jour, nous devons multiplier par 24 le montant des pertes totales, qui va ensuite être divisé par le montant des pertes réduites. 
+
+Si les locations annulées duraient moins de 9 heures et 30 minutes, les revenus supplémentaires provenant des départs tardifs et la perte des locations annulées atteignent un certain seuil de rentabilité.""")
+
+st.subheader("Calcul du seuil de rentabilité")
+
+
