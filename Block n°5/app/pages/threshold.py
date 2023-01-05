@@ -75,7 +75,7 @@ if local:
     path_pricing = './src/pricing_cleaned.csv'
     path_delays = './src/delays_cleaned.csv'
     path_no_outliers_pricing = './src/pricing_without_outliers.csv'
-    path_no_outliers_delays ='./src/delays_without_outliers_clean.csv'
+    path_no_outliers_delays ='./src/delays_without_outliers.csv'
     data_pricing = import_data(path_pricing)
     data_delays = import_data(path_delays)
     pricing_without_outliers = import_data(path_no_outliers_pricing)
@@ -89,8 +89,21 @@ st.markdown("""
 
 st.subheader("Analyse de fond sur la determination d'un seuil de rentabilité")
 
-fig = px.histogram(data_pricing['rental_price_per_day'], color_discrete_sequence=['cyan','royalblue'])
-st.plotly_chart(fig, use_container_width=True)
+# on ne prend pas les outliers pour avoir un nombre total de sample plus exacte (nous ne connaissons pas les raisons des NaN)
+delays_without_nan = data_delays.dropna(subset=['delay_at_checkout_in_minutes'])
+
+col1, col2= st.columns(2)
+
+with col1:
+    st.markdown(""" Distribution du prix d'une location """)
+    fig1 = px.histogram(data_pricing['rental_price_per_day'], color_discrete_sequence=['cyan'])
+    st.plotly_chart(fig1, use_container_width=True)
+
+with col2:
+    st.markdown(""" Distribution du temps de retards(sans outliers) """)
+    threshold_range_delais = delays_without_nan[(delays_without_nan['delay_at_checkout_in_minutes']>-1500) & (delays_without_nan['delay_at_checkout_in_minutes']<1500)]
+    fig2 = px.histogram(threshold_range_delais['delay_at_checkout_in_minutes'], color_discrete_sequence=['royalblue'])
+    st.plotly_chart(fig2, use_container_width=True)
    
 st.markdown("""Comme nous sommes sur une distribution gaussienne, la moyenne et la median sont equivalente donc nous prendrons la moyenne.
 
@@ -112,8 +125,6 @@ st.markdown("""En multipliant la somme des retards d'une certaine tranche horair
 Nous allons pouvoir afficher sur un graphique les pertes et leur evolution au cours de 24h""")
 
 h = 24
-# on ne prend pas les outliers pour avoir un nombre total de sample plus exacte (nous ne connaissons pas les raisons des NaN)
-delays_without_nan = data_delays.dropna(subset=['delay_at_checkout_in_minutes'])
 prix_moyen_course = data_pricing['rental_price_per_day'].mean()
 prix_moyen_course_par_heure = prix_moyen_course / (24*60)
 
@@ -183,18 +194,20 @@ def create_risque_threshold(data_delays, data_pricing, penalty, range_minute=30)
     fig.update_layout(title = go.layout.Title(text = "Calcul de risque", x=0.5), showlegend=False)
     return fig
 
-col1, col2 = st.columns(2)
-
-colors = ['cyan','royalblue', 'darkblue', 'lightcyan', 'mediumturquoise', 'lightblue', 'blue']
-
-with col1:
+st.markdown("Choisir un type de statut ")
+s= st.selectbox("Selectionnez un type de statut", ['Avec outliers', 'Sans outliers'])
+if s == 'Avec outliers':
     st.markdown(""" Seuil de risque avec `outliers` """)
-    fig1 = create_risque_threshold(data_delays, data_pricing, penalty=2, range_minute=30)
-    st.plotly_chart(fig1, use_container_width=True)
-
-with col2:
+    pricing, delays = data_pricing, data_delays
+else:
     st.markdown(""" Seuil de risque sans `outliers` """)
-    fig2 = create_risque_threshold(delays_without_outliers, pricing_without_outliers, penalty=2, range_minute=30)
-    st.plotly_chart(fig2, use_container_width=True)
+    pricing, delays = pricing_without_outliers, delays_without_outliers
+fig = create_risque_threshold(delays, pricing, penalty=2, range_minute=30)
+st.plotly_chart(fig, use_container_width=True)
 
 
+st.markdown("""Avec les graphiques précedents, on remaque un taux de risque de 350% qui décroit jusqu'a une valeur normal(100%) situé aux alentours de 150 minutes : nous devrions donc attendre 150 minutes entre deux locations pour baisser le nombre d'annulation.
+
+Il faut savoir que notre étude à été effectuée sur une base de 24h (pour simplifier le process), il faudrait peut être l'étudier sur des bases plus courtes (12h ou 6h) pour comparer les résultats.
+
+Il faudrait également avoir comme données les heures de début et de fin de toutes les locations pour se faire une idée sur les moments propices aux annulations (ce qui augmenterait ou diminuerait le taux de risque sur ces tranches horaires)""")
