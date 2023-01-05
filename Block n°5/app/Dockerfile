@@ -14,4 +14,4 @@ RUN pip install -r /dependencies/requirements.txt
 
 COPY . /home/app
 
-CMD streamlit run --server.port $PORT app.py
+CMD streamlit run --server.port $PORT app_delays.py
