@@ -50,7 +50,7 @@ st.markdown("""
     ------------------------
 """)
 
-st.header("Chargement des données")
+st.subheader("Chargement des données")
 
 aws=False
 local=True
