@@ -63,13 +63,11 @@ if aws:
         client = boto3.client(
             "s3",
             # il faut d'abord crée les variables d'environnement "s3_key" et "s3_secret" : s3_key = XXXXXX, s3_secret = XXXXXX, après on peut les appeler avec os.getenv(key)
-            aws_access_key_id = os.getenv("s3_key"),
-            aws_secret_access_key=os.getenv("s3_secret")
+            aws_access_key_id = os.getenv("AWS_S3_KEY"),
+            aws_secret_access_key=os.getenv("AWS_S3_SECRET")
         )
 
-        response = client.get_object(Bucket = "app-getaround",
-                                    Key = "get_around_delay_analysis.csv")
-            
+        response = client.get_object(Bucket = "get-around-bucket", Key = "delays_cleaned.csv")
         status = response.get("ResponseMetadata", {}).get("HTTPStatusCode")
 
         if status != 200:

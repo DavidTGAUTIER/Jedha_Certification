@@ -7,8 +7,8 @@ from plotly.subplots import make_subplots
 import scipy
 import plotly.figure_factory as ff
 import plotly.io as pio
-import copy
-import boto3
+from google.oauth2 import service_account
+from google.cloud import storage
 import os
 
 st.set_page_config(
@@ -61,14 +61,14 @@ if aws:
 
     credentials = service_account.Credentials.from_service_account_info(st.secrets["gcp_service_account"])
     client = storage.Client(credentials=credentials)
-    # permet de memorizer les executions de fonctions (cad les mettre en cache pour eviter d'avoir besoin de les relancer : on choisit une valeur de 900s, cad que si pendant 15min il y a un changement, charge auto la fonction)
+    # permet de memorizer les executions de fonctions (cad les mettre en cache pour eviter d'avoir besoin de les relancer : on choisi une valeur de 900s, cad que si pendant 15min il y a un changement, charge auto la fonction)
     @st.experimental_memo(ttl=600)
     def import_data(bucket_name, file_path):
         bucket = client.bucket(bucket_name)
         content = bucket.blob(file_path).download_as_string().decode('utf-8')
         return content
 
-    bucket_name = "get_around_data"
+    bucket_name = "get-around-bucket"
     file_path = "pricing.csv"
 
     data = import_data(bucket_name, file_path)
