@@ -105,4 +105,20 @@ Si les locations annulées duraient moins de 9 heures et 30 minutes, les revenus
 
 st.subheader("Calcul du seuil de rentabilité")
 
+st.markdown("""En multipliant la somme des retards d'une certaine tranche horaire obtenus par le prix moyen d'une course, on peut connaitre le montant total des retards de cette tranche horaire.
+Nous allons pouvoir afficher sur un graphique les pertes et leur evolution au cours de 24h""")
 
+# on ne prend pas les outliers pour avoir un nombre total de sample plus exacte (nous ne connaissons pas les raisons des NaN)
+delays_without_nan = data_delays.dropna(subset=['delay_at_checkout_in_minutes'])
+
+interval_range = np.arange(0, 60*24, step=30)
+prix_minute = prix_moyen_course / (24*60)
+total_revenus_retard = []
+
+for interval in interval_range:
+    threshold = delays_without_nan[delays_without_nan['delay_at_checkout_in_minutes'] > interval]
+    somme_retard = threshold.loc[:, 'delay_at_checkout_in_minutes'].sum()
+    somme_revenus_retard = somme_retard * prix_minute
+    total_revenus_retard.append(somme_revenus_retard)
+    
+total_revenus_retard.reverse()
