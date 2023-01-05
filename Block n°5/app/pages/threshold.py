@@ -74,9 +74,12 @@ if local:
 
     path_pricing = './src/pricing_cleaned.csv'
     path_delays = './src/delays_cleaned.csv'
-
+    path_no_outliers_pricing = './src/pricing_without_outliers.csv'
+    path_no_outliers_delays ='./src/delays_without_outliers_clean.csv'
     data_pricing = import_data(path_pricing)
     data_delays = import_data(path_delays)
+    pricing_without_outliers = import_data(path_no_outliers_pricing)
+    delays_without_outliers = import_data(path_no_outliers_delays)
 
 data_load_state.text("Données disponibles")
 
@@ -180,6 +183,18 @@ def create_risque_threshold(data_delays, data_pricing, penalty, range_minute=30)
     fig.update_layout(title = go.layout.Title(text = "Calcul de risque", x=0.5), showlegend=False)
     return fig
 
-fig = create_risque_threshold(delays, pricing, penalty=2, range_minute=30)
+col1, col2 = st.columns(2)
+
+colors = ['cyan','royalblue', 'darkblue', 'lightcyan', 'mediumturquoise', 'lightblue', 'blue']
+
+with col1:
+    st.markdown(""" Seuil de risque avec `outliers` """)
+    fig1 = create_risque_threshold(data_delays, data_pricing, penalty=2, range_minute=30)
+    st.plotly_chart(fig1, use_container_width=True)
+
+with col2:
+    st.markdown(""" Seuil de risque sans `outliers` """)
+    fig2 = create_risque_threshold(delays_without_outliers, pricing_without_outliers, penalty=2, range_minute=30)
+    st.plotly_chart(fig2, use_container_width=True)
 
 
