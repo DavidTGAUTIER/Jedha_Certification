@@ -139,3 +139,14 @@ fig.add_hline(y=int(pertes_totales/h*heures_rentable))
 fig.add_trace(go.Histogram(x=total_revenus_retard),row=1, col=2)
 fig.update_layout(title = go.layout.Title(text = "Distribution des retards", x=0.5), showlegend=False)
 st.plotly_chart(fig, use_container_width=True)
+
+st.markdown("""Il faudrait connaitre la **durée de chaque trajet**, **le temps qu'une voiture reste inutilisée** ou bien si **il existe d'autres voitures disponibles** ect..., pour estimer avec précision les pertes.
+
+De plus, nous admettrons que:
+
+* Chaque minute de retard entraîne une annulation
+* Chaque location ont déja une prochaine location de prévue 
+* Toutes les locations annulées auraient été une location de 24 heures
+
+Nous allons donc calculer un taux de risque """)
+
