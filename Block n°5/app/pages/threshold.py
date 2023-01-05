@@ -134,9 +134,9 @@ for interval in interval_range:
 total_revenus_retard.reverse()
 h = 24
 fig = make_subplots(rows = 1, cols = 2, subplot_titles = ("Cout de revient des annulations sur 24h", "Distribution des annulations"))
-fig.add_trace(go.Scatter(x=interval_range/60, y=total_revenus_retard), row=1, col=1)
+fig.add_trace(go.Scatter(x=interval_range/60, y=total_revenus_retard, marker_color='cyan', fill='tozeroy'), row=1, col=1)
 fig.add_hline(y=int(pertes_totales/h*heures_rentable))
-fig.add_trace(go.Histogram(x=total_revenus_retard),row=1, col=2)
+fig.add_trace(go.Histogram(x=total_revenus_retard, marker_color='royalblue'),row=1, col=2)
 fig.update_layout(title = go.layout.Title(text = "Distribution des retards", x=0.5), showlegend=False)
 st.plotly_chart(fig, use_container_width=True)
 
@@ -148,5 +148,38 @@ De plus, nous admettrons que:
 * Chaque location ont déja une prochaine location de prévue 
 * Toutes les locations annulées auraient été une location de 24 heures
 
-Nous allons donc calculer un taux de risque """)
+Nous allons donc calculer un taux de risque : En calculant le revenu moyen qui depend du nombre total de courses finies, du prix moyen d'une course et le prix total qu'aurait pu rapporter les retards, on se rend compte
+qu'il y a une perte de 1139901$ liée au retard, qui correspond à 0.49 fois le revenu total estimé des locations qui est un montant de 2347053$.
+
+Cela représente 50% de pertes seches que nous pouvons tenter de réduire en optimisant les délais de location. Cependant, nous devons connaitre les raisons qui poussent les utilisateurs à annuler leur course.
+Nous allons fixer un seuil de risque qui est un compromis entre eviter de perdre de l'argent par des annulations et eviter que ce délais soit trop long pour maximiser les profits des courses. Nous allons fixer une pénalité pour les retards ainsi augmenter le tarif de location.
+On va donc créer une fonction qui va determiner un seuil de risque en fonction des retards""")
+
+def create_risque_threshold(data_delays, data_pricing, penalty, range_minute=30):
+    
+    interval_range = np.arange(0, 60*24, step=range_minute)
+    taux_risque, total_revenus_retard = [], []
+    prix_moyen_course = data_pricing['rental_price_per_day'].mean()
+    prix_minute = prix_moyen_course / (24*60)
+   
+    for interval in interval_range:
+        threshold = data_delays[data_delays['delay_at_checkout_in_minutes'] > interval]
+        nombre_retard = threshold['delay_at_checkout_in_minutes'].count()
+        somme_retard = threshold['delay_at_checkout_in_minutes'].sum()
+        somme_revenus_retard = somme_retard * prix_minute
+        somme_revenus_retard_penalite = somme_revenus_retard * penalty
+        niveau_risque = nombre_retard * prix_moyen_course
+        taux_risque.append(niveau_risque / somme_revenus_retard_penalite)
+        total_revenus_retard.append(somme_revenus_retard_penalite)
+        
+    # On va pouvoir afficher le graphique qui représente l'evolution du risque en fonction du temps passé
+    fig = make_subplots(rows = 1, cols = 2, subplot_titles = ("Seuil de risque des annulations sur 24h", "Distribution des revenus en fonction du risque"))
+    h = 24
+    fig.add_trace(go.Scatter(x=interval_range, y=taux_risque, marker_color='cyan', fill='tozeroy'), row=1, col=1)
+    fig.add_trace(go.Histogram(x=total_revenus_retard, marker_color='royalblue'),row=1, col=2)
+    fig.update_layout(title = go.layout.Title(text = "Calcul de risque", x=0.5), showlegend=False)
+    return fig
+
+fig = create_risque_threshold(delays, pricing, penalty=2, range_minute=30)
+
 
