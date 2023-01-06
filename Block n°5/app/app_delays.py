@@ -52,8 +52,8 @@ st.markdown("""
 st.subheader("Chargement des données")
 
 
-aws=False
-local=True
+aws=True
+local=False
 
 if aws:
     @st.cache
