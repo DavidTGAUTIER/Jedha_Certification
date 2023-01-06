@@ -1,6 +1,7 @@
 [browser]
-serverAddress = 'localhost:4000'
-port = 4000
+# serveur local : serverAddress = 'localhost:4000'
+# serveur local : port = 4000
+PORT = 8501
 
 [global]
 dataFrameSerialization = "legacy"
