@@ -276,16 +276,16 @@ st.markdown("""
     ------------------------
 """)
 
-st.subheader("Distribution des retards en fonction du type de check-in : mobile ou connect (avec outliers)")
+st.subheader("Distribution des retards en fonction du type de check-in : `mobile` ou `connect` (avec outliers)")
 
 fig = make_subplots(rows=1, cols=2, subplot_titles=("Courses annulées","Courses terminées"))
-fig.add_trace(go.Histogram(x=data_cancel[data_cancel['checkin_type']=='mobile']['time_delta_with_previous_rental_in_minutes'], marker_color='royalblue', name='mobile'),1,1)
+# fig.add_trace(go.Histogram(x=data_cancel[data_cancel['checkin_type']=='mobile']['time_delta_with_previous_rental_in_minutes'], marker_color='royalblue', name='mobile'),1,1)
 fig.add_trace(go.Scatter(x=data_cancel[data_cancel['checkin_type']=='mobile']['time_delta_with_previous_rental_in_minutes'].sort_values().unique(), y=data_cancel[data_cancel['checkin_type']=='mobile']['time_delta_with_previous_rental_in_minutes'].value_counts().sort_index(), marker_color='royalblue', fill='tozeroy', showlegend=False),1,1)
-fig.add_trace(go.Histogram(x=data_cancel[data_cancel['checkin_type']=='connect']['time_delta_with_previous_rental_in_minutes'],marker_color='cyan', name='connect'),1,1)
+# fig.add_trace(go.Histogram(x=data_cancel[data_cancel['checkin_type']=='connect']['time_delta_with_previous_rental_in_minutes'],marker_color='cyan', name='connect'),1,1)
 fig.add_trace(go.Scatter(x=data_cancel[data_cancel['checkin_type']=='connect']['time_delta_with_previous_rental_in_minutes'].sort_values().unique(), y=data_cancel[data_cancel['checkin_type']=='connect']['time_delta_with_previous_rental_in_minutes'].value_counts().sort_index(), marker_color='cyan', fill='tonexty', showlegend=False),1,1)
-fig.add_trace(go.Histogram(x=data_ended[data_ended['checkin_type']=='mobile']['time_delta_with_previous_rental_in_minutes'], marker_color='royalblue', name='mobile', showlegend=False),1,2)
+# fig.add_trace(go.Histogram(x=data_ended[data_ended['checkin_type']=='mobile']['time_delta_with_previous_rental_in_minutes'], marker_color='royalblue', name='mobile', showlegend=False),1,2)
 fig.add_trace(go.Scatter(x=data_ended[data_ended['checkin_type']=='mobile']['time_delta_with_previous_rental_in_minutes'].sort_values().unique(), y=data_ended[data_ended['checkin_type']=='mobile']['time_delta_with_previous_rental_in_minutes'].value_counts().sort_index(), marker_color='royalblue', fill='tonexty', showlegend=False),1,2)
-fig.add_trace(go.Histogram(x=data_ended[data_ended['checkin_type']=='connect']['time_delta_with_previous_rental_in_minutes'],marker_color='cyan', name='connect', showlegend=False),1,2)
+# fig.add_trace(go.Histogram(x=data_ended[data_ended['checkin_type']=='connect']['time_delta_with_previous_rental_in_minutes'],marker_color='cyan', name='connect', showlegend=False),1,2)
 fig.add_trace(go.Scatter(x=data_ended[data_ended['checkin_type']=='connect']['time_delta_with_previous_rental_in_minutes'].sort_values().unique(), y=data_ended[data_ended['checkin_type']=='connect']['time_delta_with_previous_rental_in_minutes'].value_counts().sort_index(), marker_color='cyan', fill='tozeroy', showlegend=False),1,2)
 st.plotly_chart(fig, use_container_width=True)
 
