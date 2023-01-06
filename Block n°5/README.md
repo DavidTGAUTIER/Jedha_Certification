@@ -14,4 +14,5 @@ name : David TIFFENEAU-GAUTIER
 
 link to the video (Get Around) : 
 
-link app streamlit(on Render) : https://get-around-deployment.onrender.com/
+link app streamlit(on Render) : [get-around-streamlit](https://get-around-deployment.onrender.com/)
+link app fast-api(on Heroku) : [get-around-fast-api](https://get-around-fastapi.herokuapp.com/docs)
