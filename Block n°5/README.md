@@ -12,7 +12,7 @@ email : davidtiffeneau@live.fr
 
 name : David TIFFENEAU-GAUTIER
 
-link to the video (Get Around) : 
+link to the video (Get Around) : https://share.vidyard.com/watch/YgjnW7oumAYmMZFbd9YJpN?
 
 link app streamlit(on Render) : [get-around-streamlit](https://get-around-deployment.onrender.com/)</br>
 link app fast-api(on Heroku) : [get-around-fast-api](https://get-around-fastapi.herokuapp.com/docs)

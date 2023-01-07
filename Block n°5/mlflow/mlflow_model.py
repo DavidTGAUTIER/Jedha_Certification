@@ -1,8 +1,6 @@
 import mlflow
 import os
-
 import pandas as pd
-
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
@@ -78,10 +76,11 @@ def mlflow_training(data, experiment, preprocessor, model_test_name='XGBOOST_tes
     xgboost = XGBRegressor(eta=0.1, n_estimators=150, min_child_weight=2, gamma=0.7, colsample_bytree=0.4)
     pipeline = Pipeline([('preprocessing', preprocessor),('prediction', model)])
 
-    mlflow.sklearn.autolog(registered_model_name=model_name)
+    mlflow.sklearn.autolog(registered_model_name=model_test_name)
     with mlflow.start_run(experiment_id=experiment.experiment_id):
         model = xgboost
         pipe1 = pipeline
+        # XGBOOST testing ne prend en entrée que le train set
         pipe1.fit(X_train, y_train)
         y_test_pred = pipe1.predict(X_test)
         score_r2 = r2_score(y_test, y_test_pred)
@@ -92,6 +91,7 @@ def mlflow_training(data, experiment, preprocessor, model_test_name='XGBOOST_tes
     with mlflow.start_run(experiment_id=experiment.experiment_id):
         model = xgboost
         pipe2 = pipeline
+        # XGBOOST production prend en entrée le dataset en entier
         pipe2.fit(X, y)
         y_test_pred = pipe2.predict(X_test)
         score_r2 = r2_score(y_test, y_test_pred)
