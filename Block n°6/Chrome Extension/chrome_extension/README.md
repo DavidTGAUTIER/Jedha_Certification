@@ -1,1 +1,1 @@
-Voici les étapes pour réaliser localement l'ajout de l'extension chrome qui permet d'utiliser l'application
+Voici les étapes pour réaliser localement l'ajout de l'extension chrome qui permet d'utiliser l'application directement depuis le site de Babelio:</br>
