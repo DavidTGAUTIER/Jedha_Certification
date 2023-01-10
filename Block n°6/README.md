@@ -34,4 +34,4 @@ This project was born from an idea that current content recommendations were not
 
 Each step will be explain by his own README.md file
 
-link to app : http://mldatago.com:8080/
+link to app : https://babelio.mldatago.com/ 
