@@ -58,6 +58,7 @@ class BabelioBookSpider(scrapy.Spider):
 
     # on redéfinit la methode 'from_crawler' de la classe mere de BabelioBookSpider(qui est scrapy.Spider)
     # elle permet dedéclencher une méthode dans une classe Spider juste avant qu'elle ne se termine
+    # Ca permet de déclencher un évènement quand le spider fait une action particulière : ici, quand il se termine, ca affiche les stats de progression du scrapping
     @classmethod
     def from_crawler(cls, crawler, *args, **kwargs):
         spider = super(BabelioBookSpider, cls).from_crawler(crawler, *args, **kwargs)
@@ -143,8 +144,10 @@ class BabelioBookSpider(scrapy.Spider):
             # sur la page de critiques d'un livre (ex:'https://www.babelio.com' + '/livres/Da-Costa-La-doublure/1433127/critiques')     
             url_profile = "https://www.babelio.com"+com.xpath('.//a[@class="author"]').attrib["href"]
             try:
+                # on essai de récupérer le 'user_id' (https://www.babelio.com/monprofil.php?id_user=623574) en splittant l'url à partir du '=' et de recupérer la partie droite([1])
                 user_id = url_profile.split('=')[1].strip()
             except:
+                # sinon, on met une valeur par default à 'user_id'
                 user_id = 0
 
             if nb_comm_fornow >= config.NB_COMM_MAX: #nb max de comm à parser atteint, on arrête
@@ -196,3 +199,5 @@ class BabelioBookSpider(scrapy.Spider):
 
 if __name__ == "__main__":
     scrapping_book_runner(config.FINAL_FILE.format(config.NAME_USER))
+
+    

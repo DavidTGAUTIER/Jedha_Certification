@@ -18,7 +18,7 @@ Ce projet est né d'une idée selon laquelle les recommandations actuelles de co
 
 Chaque étape sera documenter par son propre fichier README.md 
 
-Voici le rendu de l'application : http://mldatago.com:8080/
+Voici le rendu de l'application : https://babelio.mldatago.com/ 
 
 English : 
 
