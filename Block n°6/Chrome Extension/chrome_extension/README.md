@@ -1,1 +1,2 @@
 Voici les étapes pour réaliser localement l'ajout de l'extension chrome qui permet d'utiliser l'application directement depuis le site de Babelio:</br>
+* 1 - Décompressez l'archive zip dans le répertoire de votre choix.
